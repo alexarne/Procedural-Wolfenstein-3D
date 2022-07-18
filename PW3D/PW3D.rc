@@ -47,10 +47,10 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Font
+// PNG
 //
 
-IDR_FONT1               FONT                    "C:\\Users\\alexg\\Downloads\\AlexandriaFLF.ttf"
+IDB_PNG1                PNG                     "C:\\Users\\alexg\\Desktop\\PCR\\Schoolwork\\Hogskola\\Programmering\\Personal GitHub\\test.png"
 
 #endif    // Swedish (Sweden) resources
 /////////////////////////////////////////////////////////////////////////////

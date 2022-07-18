@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by PW3D1.rc
+// Used by PW3D.rc
 //
 #define IDB_PNG1                        101
 
