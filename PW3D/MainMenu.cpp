@@ -15,7 +15,6 @@ MainMenu::MainMenu() {
     menu[1].setString("Help");
     menu[2].setString("Settings");
     menu[3].setString("Quit");
-    std::cout << "loler\n";
 }
 
 MainMenu::~MainMenu() {
@@ -24,7 +23,6 @@ MainMenu::~MainMenu() {
 
 void MainMenu::draw(sf::RenderWindow& window) {
     for (int i = 0; i < MAX_MENU; i++) window.draw(menu[0]);
-    std::cout << "loler2\n";
 }
 
 void MainMenu::reset() {

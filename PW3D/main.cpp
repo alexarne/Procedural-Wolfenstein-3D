@@ -1,5 +1,6 @@
 #include "main.h"
 #include "MainMenu.h"
+#include "assets.h"
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -8,6 +9,7 @@
 
 using std::cout;
 using std::endl;
+using std::to_string;
 
 //void resizeWindow(sf::RenderWindow &window, int newWidth, int newHeight);
 
@@ -15,7 +17,7 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Procedural Wolfenstein 3D", sf::Style::Titlebar | sf::Style::Close);
     sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    shape.setFillColor(sf::Color::Red);
     //resize(window, 500, 500);
     MainMenu mainMenu;
 
@@ -34,7 +36,8 @@ int main()
 
         sf::Text text;
         sf::Font font;
-        font.loadFromFile("AlexandriaFLF.ttf");
+        //font.loadFromFile("AlexandriaFLF.ttf");
+        font.loadFromMemory(&AlexandriaFLF_ttf, AlexandriaFLF_ttf_len);
         text.setFont(font);
         text.setString("loler");
         text.setPosition(100, 100);
@@ -43,12 +46,25 @@ int main()
         window.draw(text);
 
         sf::Texture texture;
-        texture.loadFromFile("test.png");
+        texture.loadFromMemory(&test, test_len);
         texture.setSmooth(true);
         sf::Sprite sprite;
         sprite.setTexture(texture);
         window.draw(sprite);
         //texture.update(window);
+
+        sf::Vector2i position = sf::Mouse::getPosition(window);
+        cout << to_string(position.x) << " " << to_string(position.y) << endl;
+        //sf::Mouse::setPosition(sf::Vector2i(100, 200), window);
+
+        sf::Image image;
+        image.loadFromMemory(&test, test_len);
+        if (position.x > 0 && position.x < image.getSize().x && position.y > 0 && position.y < image.getSize().y) {
+            sf::Color pixel = image.getPixel(position.x, position.y);
+            shape.setFillColor(pixel);
+        }
+        window.draw(shape);
+        //cout << to_string(pixel.r) << " " << to_string(pixel.g) << " " << to_string(pixel.b) << endl;
 
         window.display();
     }

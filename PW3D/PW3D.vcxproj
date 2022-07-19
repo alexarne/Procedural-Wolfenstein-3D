@@ -146,15 +146,9 @@
     <ClCompile Include="MainMenu.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assets.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="MainMenu.h" />
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="PW3D.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\..\test.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
