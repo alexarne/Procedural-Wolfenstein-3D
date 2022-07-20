@@ -1,5 +1,10 @@
-// Credit: https://gist.github.com/albertz/1551304
-// Slightly modified
+/*
+ * Used for converting files into arrays (memory).
+ * Usage: ./a.exe file > transfer.txt
+ * 
+ * Credit: https://gist.github.com/albertz/1551304
+ * Slightly modified
+ */
 
 #include <stdio.h>
 #include <assert.h>
