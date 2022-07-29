@@ -1,6 +1,7 @@
 #include "main.h"
 #include "MainMenu.h"
 #include "assets.h"
+#include "button.h"
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -16,11 +17,29 @@ using std::to_string;
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Procedural Wolfenstein 3D", sf::Style::Titlebar | sf::Style::Close);
+    
+    button btn_startgame("assets/menu_startgame.png", 0.75, 0.2, (float) 256/window.getSize().x, (float) 64/window.getSize().y);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed) window.close();
+            if (event.type == sf::Event::MouseButtonPressed) printf("Game Started");
+        }
+        window.clear(sf::Color(24, 24, 24, 0));
+
+        sf::Vector2i mouse = sf::Mouse::getPosition(window);
+        btn_startgame.draw(window, mouse);
+
+        window.display();
+    }
+
+    MainMenu mainMenu;
+    //resize(window, 500, 500);
+
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Red);
-    //resize(window, 500, 500);
-    MainMenu mainMenu;
-
     while (window.isOpen())
     {
         sf::Event event;
