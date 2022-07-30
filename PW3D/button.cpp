@@ -1,38 +1,41 @@
 #include "button.h"
+#include "assets.hpp"
+#include <iostream>
 
-button::button(sf::String dir, float x, float y, float w, float h) {
+button::button(int id, float x, float y, float h) {
+    // Percentage values (0 to 1), based on window size
     percX = x;
     percY = y;
-    percW = w;
     percH = h;
 
-    texture.loadFromFile(dir);
+    texture.loadFromMemory(menu_buttons[id], menu_buttons_len[id]);
     texture.setSmooth(true);
     texture_size = texture.getSize();
     sprite.setTexture(texture);
 }
 
-void button::draw(sf::RenderWindow &window, sf::Vector2i mouse) {
-    // Percentage values (0 to 1), based on window size
-    int x = window.getSize().x * percX;
-    int y = window.getSize().y * percY;
-    int w = window.getSize().x * percW;
-    int h = window.getSize().y * percH;
-    // Scale button
-    sprite.setScale((float) 2 * w / texture_size.x, (float) h / texture_size.y);
-    // Update sprite size through isHover
-    bool isHover = button::isHover(mouse);
-    sprite.setTextureRect(sf::IntRect(isHover ? texture_size.x / 2 : 0, 0, texture_size.x / 2, texture_size.y));
-    sprite.setPosition(x - sprite_size.x / 2, h);
+void button::draw(sf::RenderWindow &window, sf::Vector2i mouse, bool canHover) {
+    sf::Vector2u windowSize = window.getSize();
+    int x = windowSize.x * percX;
+    int y = windowSize.y * percY;
+    int h = windowSize.y * percH;
 
+    // Scale button and update size and position
+    sprite.setScale((float) h / texture_size.y, (float) h / texture_size.y);
+    sprite_size = sf::Vector2f(
+        texture_size.x / 2 * sprite.getScale().x,
+        texture_size.y * sprite.getScale().y
+    );
+    sprite.setPosition(x - sprite_size.x / 2, y);
+
+    // Check if hovering/on button
+    bool isHover = button::isInside(mouse) && canHover;
+    sprite.setTextureRect(sf::IntRect(isHover ? texture_size.x / 2 : 0, 0, texture_size.x / 2, texture_size.y));
+    
     window.draw(sprite);
 }
 
-bool button::isHover(sf::Vector2i mouse) {
-    sprite_size = sf::Vector2f(
-        texture_size.x/2 * sprite.getScale().x,
-        texture_size.y   * sprite.getScale().y
-    );
+bool button::isInside(sf::Vector2i mouse) {
     return mouse.x > sprite.getPosition().x && mouse.x < sprite.getPosition().x + sprite_size.x &&
            mouse.y > sprite.getPosition().y && mouse.y < sprite.getPosition().y + sprite_size.y;
 }
