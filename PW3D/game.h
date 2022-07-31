@@ -1,10 +1,10 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "settings.h"
+#include "Settings.h"
 
 namespace game {
-	int start(sf::RenderWindow &window, settings &settings);
+	int start(sf::RenderWindow* win, Settings* set);
 }
 
-int loop(sf::RenderWindow& window, settings &settings);
+int loop();

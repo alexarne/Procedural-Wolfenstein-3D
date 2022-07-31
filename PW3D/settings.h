@@ -1,10 +1,11 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Slider.h"
 
 struct Resolution {
-	float w;
-	float h;
+	int w;
+	int h;
 };
 
 struct Config {
@@ -14,33 +15,37 @@ struct Config {
 	Resolution res;
 };
 
-class settings
+class Settings
 {
 public:
-	settings();
+	Settings(sf::RenderWindow* win);
 
-	void draw(sf::RenderWindow& window);
-	void reset();
+	void draw(sf::Vector2i mouse);
 	bool visible();
 	void toggle();
-	void mouseAction(sf::Vector2i mouse);
+	void handleEvent(sf::Event event);
 
 	float getMovementSpeed();
 	float getRotationSpeed();
 	int getFOV();
 	Resolution getResolution();
 	Config getConfig();
-	void prevRes();
-	void nextRes();
 
-	~settings();
+	~Settings();
 private:
+	sf::RenderWindow* window;
 	bool active;
 	float percW;
 	float percH;
 	sf::RectangleShape overlay;
 	sf::RectangleShape settingsWindow;
 	sf::Vector2f settingsSize;
+
+	void reset();
+	void save();
+	void mouseAction(sf::Vector2i mouse);
+	void prevRes();
+	void nextRes();
 
 	float movementSpeed;
 	float rotationSpeed;
@@ -52,8 +57,9 @@ private:
 		{640, 360}
 	};
 	int res;
-
 	Config configuration;
-	void save();
+
+	Slider movementSlider;
+	Slider rotationSlider;
 };
 

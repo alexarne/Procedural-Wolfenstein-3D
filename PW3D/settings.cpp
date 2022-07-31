@@ -1,10 +1,12 @@
-#include "settings.h"
+#include "Settings.h"
 #include <iostream>
+#include "Slider.h"
 
-settings::settings() {
+Settings::Settings(sf::RenderWindow* win) {
+	window = win;
 	percW = (float) 300 / 1280;
 	percH = (float) 500 / 720;
-	active = false;
+	active = true;
 
 	movementSpeed = 1;
 	rotationSpeed = 1;
@@ -16,21 +18,26 @@ settings::settings() {
 		fov, 
 		resolutions[res]
 	};
+
+	movementSlider = Slider(window, 0.5, 0.5, 0.1, 0.03, 1, 10, 5);
+	rotationSlider = Slider(window, 0.5, 0.6, 0.1, 0.03, 1, 10, 5);
 }
 
-void settings::draw(sf::RenderWindow& window) {
+void Settings::draw(sf::Vector2i mouse) {
 	if (!active) return;
-	sf::Vector2u windowSize = window.getSize();
+	sf::Vector2u windowSize = window->getSize();
 	overlay = sf::RectangleShape(sf::Vector2f(windowSize.x, windowSize.y));
 	overlay.setFillColor(sf::Color(0, 0, 0, 128));
 	settingsWindow = sf::RectangleShape(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
 	settingsSize = settingsWindow.getSize();
 	settingsWindow.setPosition((float)(windowSize.x - settingsSize.x) / 2, (float)(windowSize.y - settingsSize.y) / 2);
-	window.draw(overlay);
-	window.draw(settingsWindow);
+	window->draw(overlay);
+	window->draw(settingsWindow);
+	movementSlider.draw(mouse);
+	rotationSlider.draw(mouse);
 }
 
-void settings::reset() {
+void Settings::reset() {
 	movementSpeed = configuration.movementSpeed;
 	rotationSpeed = configuration.rotationSpeed;
 	fov = configuration.fov;
@@ -39,48 +46,70 @@ void settings::reset() {
 	}
 }
 
-void settings::save() {
+void Settings::save() {
 	configuration = {
 		movementSpeed,
 		rotationSpeed,
 		fov,
 		resolutions[res]
 	};
+	window->setSize(sf::Vector2u(resolutions[res].w, resolutions[res].h));
+	window->setView(sf::View(sf::FloatRect(0, 0, resolutions[res].w, resolutions[res].h)));
 }
 
-bool settings::visible() {
+bool Settings::visible() {
 	return active;
 }
 
-void settings::toggle() {
+void Settings::toggle() {
 	active = !active;
-	settings::reset();
+	Settings::reset();
 }
 
-void settings::mouseAction(sf::Vector2i mouse) {
+void Settings::mouseAction(sf::Vector2i mouse) {
 	sf::Vector2f position = settingsWindow.getPosition();
 	if (!(mouse.x > position.x && mouse.x < position.x + settingsSize.x &&
 		  mouse.y > position.y && mouse.y < position.y + settingsSize.y)) 
 		active = false;
-	settings::prevRes();
-	printf("incr to %i\n", res);
-	settings::save();
 }
 
-void settings::prevRes() {
+void Settings::handleEvent(sf::Event event) {
+	sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
+	switch (event.type) {
+	case sf::Event::MouseButtonPressed:
+		Settings::mouseAction(click);
+		break;
+	case sf::Event::KeyPressed:
+		if (event.key.code == sf::Keyboard::Enter) Settings::save();
+		if (event.key.code == sf::Keyboard::Left) {
+			Settings::prevRes();
+			printf("selected res is %ix%i\n", resolutions[res].w, resolutions[res].h);
+		}
+		if (event.key.code == sf::Keyboard::Right) {
+			Settings::nextRes();
+			printf("selected res is %ix%i\n", resolutions[res].w, resolutions[res].h);
+		}
+
+		break;
+	}
+	movementSlider.handleEvent(event);
+	rotationSlider.handleEvent(event);
+}
+
+void Settings::prevRes() {
 	if (--res < 0) res = NUM_RES - 1;
 }
 
-void settings::nextRes() {
+void Settings::nextRes() {
 	if (++res >= NUM_RES) res = 0;
 }
 
-float settings::getMovementSpeed() { return movementSpeed; }
-float settings::getRotationSpeed() { return rotationSpeed; }
-int settings::getFOV() { return fov; }
-Resolution settings::getResolution() { return resolutions[res]; }
-Config settings::getConfig() { return configuration; }
+float Settings::getMovementSpeed() { return movementSpeed; }
+float Settings::getRotationSpeed() { return rotationSpeed; }
+int Settings::getFOV() { return fov; }
+Resolution Settings::getResolution() { return resolutions[res]; }
+Config Settings::getConfig() { return configuration; }
 
-settings::~settings() {
+Settings::~Settings() {
 
 }

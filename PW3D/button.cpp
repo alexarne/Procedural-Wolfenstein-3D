@@ -2,7 +2,9 @@
 #include "assets.hpp"
 #include <iostream>
 
-button::button(int id, float x, float y, float h) {
+button::button(sf::RenderWindow* win, int id, float x, float y, float h) {
+    window = win;
+
     // Percentage values (0 to 1), based on window size
     percX = x;
     percY = y;
@@ -14,8 +16,8 @@ button::button(int id, float x, float y, float h) {
     sprite.setTexture(texture);
 }
 
-void button::draw(sf::RenderWindow &window, sf::Vector2i mouse, bool canHover) {
-    sf::Vector2u windowSize = window.getSize();
+void button::draw(sf::Vector2i mouse, bool canHover) {
+    sf::Vector2u windowSize = window->getSize();
     int x = windowSize.x * percX;
     int y = windowSize.y * percY;
     int h = windowSize.y * percH;
@@ -32,7 +34,7 @@ void button::draw(sf::RenderWindow &window, sf::Vector2i mouse, bool canHover) {
     bool isHover = button::isInside(mouse) && canHover;
     sprite.setTextureRect(sf::IntRect(isHover ? texture_size.x / 2 : 0, 0, texture_size.x / 2, texture_size.y));
     
-    window.draw(sprite);
+    window->draw(sprite);
 }
 
 bool button::isInside(sf::Vector2i mouse) {
