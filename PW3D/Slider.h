@@ -6,18 +6,19 @@
 class Slider
 {
 public:
-	Slider(sf::RenderWindow* window, float x, float y, float w, float h, float f, float t, float defValue);
+	Slider(sf::RenderWindow* window, float x, float y, float w, float h, float f, float t);
 	Slider();
 
 	void draw(sf::Vector2i mouse);
 	void handleEvent(sf::Event event);
-	int getValue();
+	void setValue(float value);
+	float getValue();
 
 	~Slider();
 private:
 	void updateValue(sf::Vector2i mouse);
 	void updateHandle();
-	bool isInside(sf::Vector2i mouse, sf::RectangleShape rect);
+	bool isInside(sf::Vector2i mouse);
 
 	sf::RenderWindow* window;
 	float percX;

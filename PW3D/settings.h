@@ -8,28 +8,25 @@ struct Resolution {
 	int h;
 };
 
-struct Config {
+struct Configuration {
 	float movementSpeed;
-	float rotationSpeed;
+	float sensitivity;
 	int fov;
-	Resolution res;
+	int res;
 };
 
 class Settings
 {
 public:
-	Settings(sf::RenderWindow* win);
+	Settings(sf::RenderWindow* win, Configuration* config);
 
 	void draw(sf::Vector2i mouse);
 	bool visible();
 	void toggle();
 	void handleEvent(sf::Event event);
 
-	float getMovementSpeed();
-	float getRotationSpeed();
-	int getFOV();
 	Resolution getResolution();
-	Config getConfig();
+	Configuration* getConfig();
 
 	~Settings();
 private:
@@ -37,19 +34,21 @@ private:
 	bool active;
 	float percW;
 	float percH;
+	float startX;
+	float endX;
+	float startY;
+	float endY;
 	sf::RectangleShape overlay;
 	sf::RectangleShape settingsWindow;
 	sf::Vector2f settingsSize;
 
 	void reset();
 	void save();
-	void mouseAction(sf::Vector2i mouse);
+	void mouseClick(sf::Vector2i mouse);
 	void prevRes();
 	void nextRes();
+	void displayRes();
 
-	float movementSpeed;
-	float rotationSpeed;
-	int fov;
 	const int NUM_RES = 3;
 	Resolution resolutions[3] = {
 		{1280, 720},
@@ -57,9 +56,17 @@ private:
 		{640, 360}
 	};
 	int res;
-	Config configuration;
 
+	Configuration* config;
 	Slider movementSlider;
-	Slider rotationSlider;
+	Slider sensitivitySlider;
+	Slider fovSlider;
+
+	int h1;
+	int h2; 
+	int h3;
+	sf::Font f;
+	sf::Text resText;
+	sf::Text title;
 };
 

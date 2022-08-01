@@ -5,11 +5,11 @@
 
 sf::RenderWindow* window;   // Pointer to the window
 Settings* settings;         // Pointer to the settings object
+Configuration* config;      // Pointer to the values/configuration to be used
 
 bool running;               // If the game is running
 bool settingsVisible;       // If settings are visible
 bool prevSettingsVisible;   // If settings were visible last game loop
-Config configuration;       // The settings/configuration to be used
 
 int game::start(sf::RenderWindow* win, Settings* set) {
     window = win;
@@ -17,7 +17,7 @@ int game::start(sf::RenderWindow* win, Settings* set) {
     running = true;
     settingsVisible = false;
     prevSettingsVisible = false;
-    configuration = settings->getConfig();
+    config = settings->getConfig();
 
     window->setMouseCursorVisible(false);
     int value = loop();
@@ -28,8 +28,8 @@ int game::start(sf::RenderWindow* win, Settings* set) {
 
 int loop() {
     sf::RectangleShape rect(sf::Vector2f(100, 200));
-    int x = 0;
-    int y = 0;
+    float x = 0;
+    float y = 0;
     sf::Vector2u windowSize = window->getSize();
     sf::Mouse::setPosition(sf::Vector2i(windowSize.x / 2, windowSize.y / 2), *window);
     rect.setFillColor(sf::Color::Blue);
@@ -53,8 +53,8 @@ int loop() {
         else {
             if (!settingsVisible) {
                 sf::Vector2u windowSize = window->getSize();
-                x += mouse.x - windowSize.x / 2;
-                y += mouse.y - windowSize.y / 2;
+                x += config->sensitivity * (mouse.x - (float) windowSize.x / 2);
+                y += config->sensitivity * (mouse.y - (float) windowSize.y / 2);
                 sf::Mouse::setPosition(sf::Vector2i(windowSize.x / 2, windowSize.y / 2), *window);
                 rect.setPosition(windowSize.x / 2 + x, windowSize.y / 2 + y);
             }

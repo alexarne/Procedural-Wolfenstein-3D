@@ -1,6 +1,6 @@
 #include "main.h"
 #include "MainMenu.h"
-#include "button.h"
+#include "Button.h"
 #include "game.h"
 #include "Settings.h"
 
@@ -15,13 +15,15 @@ int main()
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Procedural Wolfenstein 3D", sf::Style::Titlebar | sf::Style::Close);
     window.setKeyRepeatEnabled(false);
 
-    int height = 64, margin = 30;
+    int height = 64, width = 200, margin = 30;
     int startY = 360 - (3 * height + 2 * margin) / 2;
-    button btn_startgame(&window, 0, 0.75, (float)(startY + 0*(height + margin)) / 720, (float) height/720);
-    button btn_settings(&window, 1, 0.75, (float)(startY + 1*(height + margin)) / 720, (float) height/720);
-    button btn_exit(&window, 2, 0.75, (float)(startY + 2*(height + margin)) / 720, (float) height/720);
+    Button btn_startgame(&window, "Start Game", 0.75, (float)(startY + 0*(height + margin)) / 720, (float) width / 720, (float) height/720, ALIGN_CENTER);
+    Button btn_settings(&window, "Settings", 0.75, (float)(startY + 1*(height + margin)) / 720, (float) width / 720, (float) height/720, ALIGN_CENTER);
+    Button btn_quit(&window, "Quit", 0.75, (float)(startY + 2*(height + margin)) / 720, (float) width / 720, (float) height / 720, ALIGN_CENTER);
 
-    Settings settings(&window);
+    Configuration config;
+    Settings settings(&window, &config);
+    settings.toggle();
     bool settingsVisible;
 
     while (window.isOpen()) {
@@ -32,7 +34,7 @@ int main()
         sf::Vector2i mouse = sf::Mouse::getPosition(window);
         btn_startgame.draw(mouse, !settingsVisible);
         btn_settings.draw(mouse, !settingsVisible);
-        btn_exit.draw(mouse, !settingsVisible);
+        btn_quit.draw(mouse, !settingsVisible);
 
         settings.draw(mouse);
         window.display();
@@ -55,7 +57,7 @@ int main()
                     sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
                     if (btn_startgame.isInside(click)) game::start(&window, &settings);
                     if (btn_settings.isInside(click)) settings.toggle();
-                    if (btn_exit.isInside(click)) window.close();
+                    if (btn_quit.isInside(click)) window.close();
                 }
             }
         }

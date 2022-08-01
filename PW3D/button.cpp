@@ -1,47 +1,74 @@
-#include "button.h"
+#include "Button.h"
 #include "assets.hpp"
 #include <iostream>
 
-button::button(sf::RenderWindow* win, int id, float x, float y, float h) {
+Button::Button(sf::RenderWindow* win, sf::String s, float x, float y, float w, float h, int ALIGN) {
     window = win;
+    f.loadFromMemory(&font, font_len);
+    text.setFont(f);
+    text.setString(s);
+    text.setCharacterSize(30);
 
     // Percentage values (0 to 1), based on window size
     percX = x;
     percY = y;
+    percW = w;
     percH = h;
+    switch (ALIGN)
+    {
+    case ALIGN_LEFT:
+        percX -= percW;
+        break;
+    case ALIGN_CENTER:
+        percX -= percW/2;
+        break;
+    case ALIGN_RIGHT:
+        break;
+    }
+    this->thickness = 0;
 
-    texture.loadFromMemory(menu_buttons[id], menu_buttons_len[id]);
-    texture.setSmooth(true);
-    texture_size = texture.getSize();
-    sprite.setTexture(texture);
-}
-
-void button::draw(sf::Vector2i mouse, bool canHover) {
     sf::Vector2u windowSize = window->getSize();
-    int x = windowSize.x * percX;
-    int y = windowSize.y * percY;
-    int h = windowSize.y * percH;
-
-    // Scale button and update size and position
-    sprite.setScale((float) h / texture_size.y, (float) h / texture_size.y);
-    sprite_size = sf::Vector2f(
-        texture_size.x / 2 * sprite.getScale().x,
-        texture_size.y * sprite.getScale().y
-    );
-    sprite.setPosition(x - sprite_size.x / 2, y);
-
-    // Check if hovering/on button
-    bool isHover = button::isInside(mouse) && canHover;
-    sprite.setTextureRect(sf::IntRect(isHover ? texture_size.x / 2 : 0, 0, texture_size.x / 2, texture_size.y));
-    
-    window->draw(sprite);
+    button = sf::RectangleShape(sf::Vector2f());
+    baseColor = sf::Color::Black;
+    hoverColor = sf::Color(48, 48, 48);
+    textColor = sf::Color::White;
 }
 
-bool button::isInside(sf::Vector2i mouse) {
-    return mouse.x > sprite.getPosition().x && mouse.x < sprite.getPosition().x + sprite_size.x &&
-           mouse.y > sprite.getPosition().y && mouse.y < sprite.getPosition().y + sprite_size.y;
+void Button::setButtonColor(sf::Color color) { baseColor = color; }
+void Button::setHoverColor(sf::Color color) { hoverColor = color; }
+void Button::setBorder(float thickness) { this->thickness = thickness; }
+void Button::setTextColor(sf::Color color) { textColor = color; }
+
+void Button::draw(sf::Vector2i mouse, bool canHover) {
+    sf::Vector2u windowSize = window->getSize();
+    float x = windowSize.x * percX;
+    float y = windowSize.y * percY;
+    float w = windowSize.x * percW;
+    float h = windowSize.y * percH;
+    button.setSize(sf::Vector2f(w, h));
+    button.setPosition(x, y);
+
+    bool isHover = Button::isInside(mouse) && canHover;
+    button.setFillColor(isHover ? hoverColor : baseColor);
+    button.setOutlineColor(baseColor);
+    button.setOutlineThickness(windowSize.y * thickness);
+
+    text.setFillColor(sf::Color::White);
+    float scale = (float) windowSize.y / 720;
+    text.setScale(sf::Vector2f(scale, scale));
+    sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin(textBounds.left, textBounds.top);
+    text.setPosition(x + w / 2 - scale * textBounds.width / 2, y + h / 2 - scale * textBounds.height / 2);
+
+    window->draw(button);
+    window->draw(text);
+
 }
 
-button::~button() {
+bool Button::isInside(sf::Vector2i mouse) {
+    return button.getGlobalBounds().contains(sf::Vector2f(mouse.x, mouse.y));
+}
+
+Button::~Button() {
 
 }
