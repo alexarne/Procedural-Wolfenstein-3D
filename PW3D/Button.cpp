@@ -2,12 +2,19 @@
 #include "assets.hpp"
 #include <iostream>
 
-Button::Button(sf::RenderWindow* win, sf::String s, float x, float y, float w, float h, int ALIGN) {
+Button::Button() {
+}
+
+void Button::init(sf::RenderWindow* win, sf::String s, float x, float y, float w, float h, int charSize, int ALIGN) {
     window = win;
+
     f.loadFromMemory(&font, font_len);
     text.setFont(f);
+    text.setFillColor(sf::Color::White);
+    text.setCharacterSize(charSize);
+    text.setString("Start Game");   // Height of standard text, depends otherwise on text
+    baseHeight = text.getGlobalBounds().height;
     text.setString(s);
-    text.setCharacterSize(30);
 
     // Percentage values (0 to 1), based on window size
     percX = x;
@@ -20,7 +27,7 @@ Button::Button(sf::RenderWindow* win, sf::String s, float x, float y, float w, f
         percX -= percW;
         break;
     case ALIGN_CENTER:
-        percX -= percW/2;
+        percX -= percW / 2;
         break;
     case ALIGN_RIGHT:
         break;
@@ -53,12 +60,11 @@ void Button::draw(sf::Vector2i mouse, bool canHover) {
     button.setOutlineColor(baseColor);
     button.setOutlineThickness(windowSize.y * thickness);
 
-    text.setFillColor(sf::Color::White);
     float scale = (float) windowSize.y / 720;
     text.setScale(sf::Vector2f(scale, scale));
     sf::FloatRect textBounds = text.getLocalBounds();
     text.setOrigin(textBounds.left, textBounds.top);
-    text.setPosition(x + w / 2 - scale * textBounds.width / 2, y + h / 2 - scale * textBounds.height / 2);
+    text.setPosition(x + w / 2 - scale * textBounds.width / 2, y + h / 2 - scale * baseHeight / 2);
 
     window->draw(button);
     window->draw(text);

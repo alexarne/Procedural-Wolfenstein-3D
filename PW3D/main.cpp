@@ -17,9 +17,12 @@ int main()
 
     int height = 64, width = 200, margin = 30;
     int startY = 360 - (3 * height + 2 * margin) / 2;
-    Button btn_startgame(&window, "Start Game", 0.75, (float)(startY + 0*(height + margin)) / 720, (float) width / 720, (float) height/720, ALIGN_CENTER);
-    Button btn_settings(&window, "Settings", 0.75, (float)(startY + 1*(height + margin)) / 720, (float) width / 720, (float) height/720, ALIGN_CENTER);
-    Button btn_quit(&window, "Quit", 0.75, (float)(startY + 2*(height + margin)) / 720, (float) width / 720, (float) height / 720, ALIGN_CENTER);
+    int characterSize = 30;
+    int ALIGNMENT = ALIGN_CENTER;
+    Button btn_startgame, btn_settings, btn_quit;
+    btn_startgame.init(&window, "Start Game", 0.75, (float)(startY + 0*(height + margin)) / 720, (float) width / 720, (float) height/720, characterSize, ALIGNMENT);
+    btn_settings.init(&window, "Settings", 0.75, (float)(startY + 1*(height + margin)) / 720, (float) width / 720, (float) height/720, characterSize, ALIGNMENT);
+    btn_quit.init(&window, "Quit", 0.75, (float)(startY + 2*(height + margin)) / 720, (float) width / 720, (float) height / 720, characterSize, ALIGNMENT);
 
     Configuration config;
     Settings settings(&window, &config);

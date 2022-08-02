@@ -60,7 +60,7 @@ int loop() {
             }
         }
         window->draw(rect);
-
+        printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config->movementSpeed, config->sensitivity, config->fov, config->visibilityDepth, config->useVisibility ? "true" : "false", config->res);
         // Get player movement information
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W));
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A));

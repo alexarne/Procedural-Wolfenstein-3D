@@ -16,10 +16,16 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	endY = 0.5 + percH / 2 - margin / 720.0;
 
 	// Default settings
+	savedFov = 60;
+	savedVis = 8;
+	savedUseVis = true;
+	res = 0;
 	config->movementSpeed = 1;
 	config->sensitivity = 1;
-	config->fov = 60;
-	config->res = 0;
+	config->fov = savedFov;
+	config->visibilityDepth = savedVis;
+	config->useVisibility = savedUseVis;
+	config->res = res;
 	this->config = config;
 
 	h1 = 34;
@@ -35,12 +41,17 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	title.setFillColor(sf::Color::Black);
 	title.setString("Settings");
 
-	movementSlider = Slider(window, 0.5, 0.5, 0.1, 0.03, 1, 10);
-	sensitivitySlider = Slider(window, 0.5, 0.6, 0.1, 0.03, 1, 10);
-	fovSlider = Slider(window, 0.5, 0.7, 0.1, 0.03, 30, 170);
-	/*nextResButton = Button();
-	prevResButton = Button();
-	closeButton = Button();
+	float sliderHeight = 15 / 720.0, sliderWidth = 128 / 1280.0;
+	movementSlider = Slider(window, 0.5, 0.5, sliderWidth, sliderHeight, 1, 10);
+	sensitivitySlider = Slider(window, 0.5, 0.55, sliderWidth, sliderHeight, 1, 10);
+	fovSlider = Slider(window, 0.5, 0.6, sliderWidth, sliderHeight, 30, 170);
+	visibilitySlider = Slider(window, 0.5, 0.65, sliderWidth, sliderHeight, 1, 20);
+
+	visibilityCheckbox = Checkbox(window, 0.5, 0.4, true);
+	
+	nextResButton.init(window, ">", 0.45, 0.4, 50 / 1280.0, 50 / 720.0, 14, ALIGN_RIGHT);
+	prevResButton.init(window, "<", 0.4, 0.4, 50 / 1280.0, 50 / 720.0, 14, ALIGN_LEFT);
+	/*closeButton = Button();
 	saveButton = Button();
 	leaveButton = Button();
 	redoButton = Button();*/
@@ -76,10 +87,17 @@ void Settings::draw(sf::Vector2i mouse) {
 	movementSlider.draw(mouse);
 	sensitivitySlider.draw(mouse);
 	fovSlider.draw(mouse);
+	visibilitySlider.draw(visibilityCheckbox.getValue() ? mouse : sf::Vector2i(0, 0));
+
+	// Draw checkbox
+	visibilityCheckbox.draw(mouse);
 
 	// Draw labels
 
 	// Draw extra buttons
+	nextResButton.draw(mouse, true);
+	prevResButton.draw(mouse, true);
+	
 
 	/* Margin showcase
 	sf::RectangleShape first(sf::Vector2f(100, 200));
@@ -95,7 +113,9 @@ void Settings::draw(sf::Vector2i mouse) {
 void Settings::reset() {
 	movementSlider.setValue(config->movementSpeed);
 	sensitivitySlider.setValue(config->sensitivity);
-	fovSlider.setValue(config->fov);
+	fovSlider.setValue(savedFov);
+	visibilitySlider.setValue(savedVis);
+	visibilityCheckbox.setValue(savedUseVis);
 	res = config->res;
 }
 
@@ -103,7 +123,12 @@ void Settings::save() {
 	config->movementSpeed = movementSlider.getValue();
 	config->sensitivity = sensitivitySlider.getValue();
 	config->fov = fovSlider.getValue();
+	config->visibilityDepth = visibilitySlider.getValue();
 	config->res = res;
+	savedFov = fovSlider.getValue();
+	savedVis = visibilitySlider.getValue();
+	savedUseVis = visibilityCheckbox.getValue();
+
 	window->setSize(sf::Vector2u(resolutions[res].w, resolutions[res].h));
 	window->setView(sf::View(sf::FloatRect(0, 0, resolutions[res].w, resolutions[res].h)));
 }
@@ -118,7 +143,12 @@ void Settings::toggle() {
 }
 
 void Settings::mouseClick(sf::Vector2i mouse) {
-	if (!settingsWindow.getGlobalBounds().contains(sf::Vector2f(mouse.x, mouse.y))) active = false;
+	if (!settingsWindow.getGlobalBounds().contains(sf::Vector2f(mouse.x, mouse.y))) {
+		Settings::toggle();
+		return;
+	}
+	if (nextResButton.isInside(mouse)) nextRes();
+	if (prevResButton.isInside(mouse)) prevRes();
 }
 
 void Settings::handleEvent(sf::Event event) {
@@ -137,6 +167,12 @@ void Settings::handleEvent(sf::Event event) {
 	movementSlider.handleEvent(event);
 	sensitivitySlider.handleEvent(event);
 	fovSlider.handleEvent(event);
+	visibilityCheckbox.handleEvent(event);
+	if (visibilityCheckbox.getValue()) visibilitySlider.handleEvent(event);
+
+	config->fov = fovSlider.getValue();
+	config->visibilityDepth = visibilitySlider.getValue();
+	config->useVisibility = visibilityCheckbox.getValue();
 }
 
 void Settings::prevRes() {

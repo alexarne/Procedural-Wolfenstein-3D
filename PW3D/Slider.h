@@ -31,5 +31,6 @@ private:
 	sf::RectangleShape handle;
 	sf::RectangleShape background;
 	bool holdingHandle;
+	bool prevHover;
 };
 

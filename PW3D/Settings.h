@@ -2,6 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 #include "Slider.h"
+#include "Checkbox.h"
+#include "Button.h"
 
 struct Resolution {
 	int w;
@@ -11,7 +13,9 @@ struct Resolution {
 struct Configuration {
 	float movementSpeed;
 	float sensitivity;
-	int fov;
+	float fov;
+	float visibilityDepth;
+	bool useVisibility;
 	int res;
 };
 
@@ -61,6 +65,11 @@ private:
 	Slider movementSlider;
 	Slider sensitivitySlider;
 	Slider fovSlider;
+	Slider visibilitySlider;
+	float savedFov;
+	float savedVis;
+	bool savedUseVis;
+	Checkbox visibilityCheckbox;
 
 	int h1;
 	int h2; 
@@ -68,5 +77,12 @@ private:
 	sf::Font f;
 	sf::Text resText;
 	sf::Text title;
+
+	Button nextResButton;
+	Button prevResButton;
+	Button closeButton;
+	Button saveButton;
+	Button leaveButton;
+	Button redoButton;
 };
 
