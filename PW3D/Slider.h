@@ -1,12 +1,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "align.h"
 
 
 class Slider
 {
 public:
-	Slider(sf::RenderWindow* window, float x, float y, float w, float h, float f, float t);
+	Slider(sf::RenderWindow* window, float x, float y, float w, float h, float f, float t, int ALIGN);
 	Slider();
 
 	void draw(sf::Vector2i mouse);
@@ -32,5 +33,8 @@ private:
 	sf::RectangleShape background;
 	bool holdingHandle;
 	bool prevHover;
+	sf::Color handleColor;
+	sf::Color backgroundColor;
+	sf::Color hoverAddColor;
 };
 

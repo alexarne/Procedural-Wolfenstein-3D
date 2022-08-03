@@ -12,7 +12,10 @@ using std::to_string;
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(1280, 720), "Procedural Wolfenstein 3D", sf::Style::Titlebar | sf::Style::Close);
+    sf::ContextSettings context;
+    context.antialiasingLevel = 8;
+
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "Procedural Wolfenstein 3D", sf::Style::Titlebar | sf::Style::Close, context);
     window.setKeyRepeatEnabled(false);
 
     int height = 64, width = 200, margin = 30;
@@ -20,8 +23,8 @@ int main()
     int characterSize = 30;
     int ALIGNMENT = ALIGN_CENTER;
     Button btn_startgame, btn_settings, btn_quit;
-    btn_startgame.init(&window, "Start Game", 0.75, (float)(startY + 0*(height + margin)) / 720, (float) width / 720, (float) height/720, characterSize, ALIGNMENT);
-    btn_settings.init(&window, "Settings", 0.75, (float)(startY + 1*(height + margin)) / 720, (float) width / 720, (float) height/720, characterSize, ALIGNMENT);
+    btn_startgame.init(&window, "Start Game", 0.75, (float)(startY + 0*(height + margin)) / 720, (float) width / 720, (float) height / 720, characterSize, ALIGNMENT);
+    btn_settings.init(&window, "Settings", 0.75, (float)(startY + 1*(height + margin)) / 720, (float) width / 720, (float) height / 720, characterSize, ALIGNMENT);
     btn_quit.init(&window, "Quit", 0.75, (float)(startY + 2*(height + margin)) / 720, (float) width / 720, (float) height / 720, characterSize, ALIGNMENT);
 
     Configuration config;
@@ -33,6 +36,7 @@ int main()
         // Draw updates all window-relative sizes
         window.clear(sf::Color(24, 24, 24, 0));
         settingsVisible = settings.visible();
+        //printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config.movementSpeed, config.sensitivity, config.fov, config.visibilityDepth, config.useVisibility ? "true" : "false", config.res);
 
         sf::Vector2i mouse = sf::Mouse::getPosition(window);
         btn_startgame.draw(mouse, !settingsVisible);

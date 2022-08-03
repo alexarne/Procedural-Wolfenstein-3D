@@ -51,7 +51,9 @@ private:
 	void mouseClick(sf::Vector2i mouse);
 	void prevRes();
 	void nextRes();
-	void displayRes();
+	void displayRes(sf::Vector2i mouse);
+	void drawTitle(sf::String subtitle, float percY);
+	bool isInside(sf::Vector2i mouse, sf::Transformable obj, sf::FloatRect bounds);
 
 	const int NUM_RES = 3;
 	Resolution resolutions[3] = {
@@ -78,11 +80,23 @@ private:
 	sf::Text resText;
 	sf::Text title;
 
+	float subtitleHeight;
+
+	sf::RectangleShape titleLine;
+
+	sf::Text subtitle;
+
+	float resPos;
 	Button nextResButton;
 	Button prevResButton;
-	Button closeButton;
+
+	float sensPos;
+
+	float appPos;
+
 	Button saveButton;
 	Button leaveButton;
 	Button redoButton;
+	sf::Text closeButton;
 };
 

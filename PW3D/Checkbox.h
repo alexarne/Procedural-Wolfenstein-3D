@@ -1,11 +1,12 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "align.h"
 
 class Checkbox
 {
 public:
-	Checkbox(sf::RenderWindow* window, float percX, float percY, bool checked);
+	Checkbox(sf::RenderWindow* window, float percX, float percY, bool checked, int ALIGN);
 	Checkbox();
 
 	void draw(sf::Vector2i mouse);

@@ -34,17 +34,18 @@ void Button::init(sf::RenderWindow* win, sf::String s, float x, float y, float w
     }
     this->thickness = 0;
 
-    sf::Vector2u windowSize = window->getSize();
     button = sf::RectangleShape(sf::Vector2f());
     baseColor = sf::Color::Black;
     hoverColor = sf::Color(48, 48, 48);
-    textColor = sf::Color::White;
+    textBaseColor = sf::Color::White;
+    textHoverColor = sf::Color::White;
 }
 
 void Button::setButtonColor(sf::Color color) { baseColor = color; }
-void Button::setHoverColor(sf::Color color) { hoverColor = color; }
+void Button::setButtonHoverColor(sf::Color color) { hoverColor = color; }
 void Button::setBorder(float thickness) { this->thickness = thickness; }
-void Button::setTextColor(sf::Color color) { textColor = color; }
+void Button::setTextColor(sf::Color color) { textBaseColor = color; }
+void Button::setTextHoverColor(sf::Color color) { textHoverColor = color; }
 
 void Button::draw(sf::Vector2i mouse, bool canHover) {
     sf::Vector2u windowSize = window->getSize();
@@ -62,6 +63,7 @@ void Button::draw(sf::Vector2i mouse, bool canHover) {
 
     float scale = (float) windowSize.y / 720;
     text.setScale(sf::Vector2f(scale, scale));
+    text.setFillColor(isHover ? textHoverColor : textBaseColor);
     sf::FloatRect textBounds = text.getLocalBounds();
     text.setOrigin(textBounds.left, textBounds.top);
     text.setPosition(x + w / 2 - scale * textBounds.width / 2, y + h / 2 - scale * baseHeight / 2);

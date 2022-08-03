@@ -2,12 +2,23 @@
 
 
 
-Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float from, float to) {
+Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float from, float to, int ALIGN) {
 	window = win;
 	percX = x;
 	percY = y;
 	percW = w;
 	percH = h;
+	switch (ALIGN)
+	{
+	case ALIGN_LEFT:
+		percX -= percW;
+		break;
+	case ALIGN_CENTER:
+		percX -= percW / 2;
+		break;
+	case ALIGN_RIGHT:
+		break;
+	}
 	this->from = from;
 	this->to = to;
 	holdingHandle = false;
@@ -18,6 +29,10 @@ Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float 
 	handle = sf::RectangleShape(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
 	background.setPosition(windowSize.x * percX, windowSize.y * percY);
 	Slider::updateHandle();
+
+	handleColor = sf::Color(70, 70, 70);
+	backgroundColor = sf::Color(120, 120, 120);
+	hoverAddColor = sf::Color(50, 50, 50);
 }
 
 Slider::Slider() {}
@@ -29,8 +44,8 @@ void Slider::draw(sf::Vector2i mouse) {
 	background.setPosition(windowSize.x * percX, windowSize.y * percY);
 	bool currHover = holdingHandle || (isInside(mouse) && !sf::Mouse::isButtonPressed(sf::Mouse::Left));
 	bool hover = currHover || prevHover;	// If hover last game cycle, hover now to avoid flicker
-	background.setFillColor(hover ? sf::Color::Yellow : sf::Color::Red);
-	handle.setFillColor(hover ? sf::Color::Cyan : sf::Color::Blue);
+	background.setFillColor(hover ? backgroundColor + hoverAddColor : backgroundColor);
+	handle.setFillColor(hover ? handleColor + hoverAddColor : handleColor);
 	prevHover = currHover;
 	Slider::updateValue(mouse);
 	Slider::updateHandle();
