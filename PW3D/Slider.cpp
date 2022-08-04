@@ -94,6 +94,7 @@ void Slider::setValue(float value) {
 	this->value = value;
 	if (this->value > to) this->value = to;
 	if (this->value < from) this->value = from;
+	printf("%f set to %f\n", value, this->value);
 }
 
 float Slider::getValue() { return value; }

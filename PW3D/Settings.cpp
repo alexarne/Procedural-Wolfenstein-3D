@@ -30,7 +30,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 
 	h1 = 34;
 	h2 = 24;
-	h3 = 20;
+	h3 = 16;
 	f.loadFromMemory(&font, font_len);
 	resText.setFont(f);
 	resText.setCharacterSize(h3);
@@ -68,14 +68,57 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	float sliderHeight = 15 / 720.0, sliderWidth = 130 / 1280.0;
 	int SLIDER_ALIGN = ALIGN_LEFT;
 
-	sensPos = resPos + 100 / 720.0;
-	movementSlider = Slider(window, endX, sensPos + 40 / 720.0, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
-	sensitivitySlider = Slider(window, endX, sensPos + 50 / 720.0 + sliderHeight, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
+	sensPos = resPos + 90 / 720.0;
+	appPos = sensPos + 110 / 720.0;
 
-	appPos = sensPos + 100 / 720.0;
-	fovSlider = Slider(window, endX, appPos + 40 / 720.0, sliderWidth, sliderHeight, 30, 170, SLIDER_ALIGN);
-	visibilityCheckbox = Checkbox(window, 0.5, appPos + 50 / 720.0 + sliderHeight, true, ALIGN_RIGHT);
-	visibilitySlider = Slider(window, endX, appPos + 60 / 720.0 + 2*sliderHeight, sliderWidth, sliderHeight, 1, 20, SLIDER_ALIGN);
+	sliderOffset = - 2 / 720.0;
+	subtitleSpacing = 45 / 720.0;
+	labelSpacing = 30 / 720.0;
+
+	labelMovementPos = sensPos + subtitleSpacing;
+	labelMousePos = labelMovementPos + labelSpacing;
+	labelFovPos = appPos + subtitleSpacing;
+	labelEnableShadowsPos = labelFovPos + labelSpacing;
+	labelDistancePos = labelEnableShadowsPos + labelSpacing;
+
+	movementSlider = Slider(window, endX, labelMovementPos + sliderOffset, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
+	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
+
+	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, 30, 170, SLIDER_ALIGN);
+	visibilityCheckbox = Checkbox(window, 0.5 + 3 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
+	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, 1, 20, SLIDER_ALIGN);
+
+	labelMovement.setFont(f);
+	labelMovement.setCharacterSize(h3);
+	labelMovement.setFillColor(sf::Color::Black);
+	labelMovement.setString("Movement");
+	labelMouse.setFont(f);
+	labelMouse.setCharacterSize(h3);
+	labelMouse.setFillColor(sf::Color::Black);
+	labelMouse.setString("Mouse");
+	labelFov.setFont(f);
+	labelFov.setCharacterSize(h3);
+	labelFov.setFillColor(sf::Color::Black);
+	labelFov.setString("FOV");
+	labelEnableShadows.setFont(f);
+	labelEnableShadows.setCharacterSize(h3);
+	labelEnableShadows.setFillColor(sf::Color::Black);
+	labelEnableShadows.setString("Enable Shadows");
+	labelDistance.setFont(f);
+	labelDistance.setCharacterSize(h3);
+	labelDistance.setFillColor(sf::Color::Black);
+	labelDistance.setString("Shadow Depth");
+
+	sf::FloatRect bounds = labelMovement.getLocalBounds();
+	labelMovement.setOrigin(bounds.left, bounds.top);
+	bounds = labelMouse.getLocalBounds();
+	labelMouse.setOrigin(bounds.left, bounds.top);
+	bounds = labelFov.getLocalBounds();
+	labelFov.setOrigin(bounds.left, bounds.top);
+	bounds = labelEnableShadows.getLocalBounds();
+	labelEnableShadows.setOrigin(bounds.left, bounds.top);
+	bounds = labelDistance.getLocalBounds();
+	labelDistance.setOrigin(bounds.left, bounds.top);
 
 	/*saveButton = Button();
 	leaveButton = Button();
@@ -132,6 +175,30 @@ void Settings::draw(sf::Vector2i mouse) {
 	visibilityCheckbox.draw(mouse);
 
 	// Draw labels
+	labelMovement.setPosition(windowSize.x * startX, windowSize.y * labelMovementPos);
+	labelMouse.setPosition(windowSize.x * startX, windowSize.y * labelMousePos);
+	labelFov.setPosition(windowSize.x * startX, windowSize.y * labelFovPos);
+	labelEnableShadows.setPosition(windowSize.x * startX, windowSize.y * labelEnableShadowsPos);
+	labelDistance.setPosition(windowSize.x * startX, windowSize.y * labelDistancePos);
+	labelMovement.setScale(scale, scale);
+	labelMouse.setScale(scale, scale);
+	labelFov.setScale(scale, scale);
+	labelEnableShadows.setScale(scale, scale);
+	labelDistance.setScale(scale, scale);
+	window->draw(labelMovement);
+	window->draw(labelMouse);
+	window->draw(labelFov);
+	window->draw(labelEnableShadows);
+	window->draw(labelDistance);
+	printf("%f\n", movementSlider.getValue());
+
+	// Block shadow field if unchecked
+	if (!visibilityCheckbox.getValue()) {
+		shadowBlock = sf::RectangleShape(sf::Vector2f(windowSize.x * (endX - startX), labelDistance.getLocalBounds().height * scale - windowSize.y * sliderOffset));
+		shadowBlock.setPosition(windowSize.x * startX, windowSize.y * (labelDistancePos + sliderOffset));
+		shadowBlock.setFillColor(sf::Color(255, 255, 255, 150));
+		window->draw(shadowBlock);
+	}
 
 	// Draw extra buttons
 	
@@ -236,7 +303,7 @@ void Settings::displayRes(sf::Vector2i mouse) {
 	resText.setScale(sf::Vector2f(scale, scale));
 	sf::FloatRect bounds = resText.getLocalBounds();
 	resText.setOrigin(bounds.left, bounds.top);
-	resText.setPosition((float) windowSize.x / 2 - scale * (float) bounds.width / 2, (resPos + 45.0 / 720) * windowSize.y + subtitleHeight * scale);
+	resText.setPosition((float) windowSize.x / 2 - scale * (float) bounds.width / 2, (resPos + 46.0 / 720) * windowSize.y + subtitleHeight * scale);
 
 	window->draw(resText);
 	nextResButton.draw(mouse, true);

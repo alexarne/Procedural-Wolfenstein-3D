@@ -64,14 +64,6 @@ private:
 	int res;
 
 	Configuration* config;
-	Slider movementSlider;
-	Slider sensitivitySlider;
-	Slider fovSlider;
-	Slider visibilitySlider;
-	float savedFov;
-	float savedVis;
-	bool savedUseVis;
-	Checkbox visibilityCheckbox;
 
 	int h1;
 	int h2; 
@@ -90,9 +82,32 @@ private:
 	Button nextResButton;
 	Button prevResButton;
 
+	float sliderOffset;
+	float subtitleSpacing;
+	float labelSpacing;
+
 	float sensPos;
+	Slider movementSlider;
+	Slider sensitivitySlider;
+	sf::Text labelMovement;
+	sf::Text labelMouse;
+	float labelMovementPos;
+	float labelMousePos;
 
 	float appPos;
+	Slider fovSlider;
+	Checkbox visibilityCheckbox;
+	Slider visibilitySlider;
+	float savedFov;
+	float savedVis;
+	bool savedUseVis;
+	sf::Text labelFov;
+	sf::Text labelEnableShadows;
+	sf::Text labelDistance;
+	float labelFovPos;
+	float labelEnableShadowsPos;
+	float labelDistancePos;
+	sf::RectangleShape shadowBlock;
 
 	Button saveButton;
 	Button leaveButton;
