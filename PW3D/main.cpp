@@ -36,8 +36,7 @@ int main()
         // Draw updates all window-relative sizes
         window.clear(sf::Color(24, 24, 24, 0));
         settingsVisible = settings.visible();
-        //printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config.movementSpeed, config.sensitivity, config.fov, config.visibilityDepth, config.useVisibility ? "true" : "false", config.res);
-
+        
         sf::Vector2i mouse = sf::Mouse::getPosition(window);
         btn_startgame.draw(mouse, !settingsVisible);
         btn_settings.draw(mouse, !settingsVisible);
@@ -62,7 +61,11 @@ int main()
             else {
                 if (event.type == sf::Event::MouseButtonPressed) {
                     sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
-                    if (btn_startgame.isInside(click)) game::start(&window, &settings);
+                    if (btn_startgame.isInside(click)) {
+                        settings.gameToggle();
+                        game::start(&window, &settings);
+                        settings.gameToggle();
+                    }
                     if (btn_settings.isInside(click)) settings.toggle();
                     if (btn_quit.isInside(click)) window.close();
                 }

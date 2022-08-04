@@ -9,6 +9,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	percW = (float) 300 / 1280;
 	percH = (float) 500 / 720;
 	active = false;
+	inGame = false;
 	int margin = 20;
 	startX = (1.0 - percW) / 2 + margin / 1280.0;
 	endX = 0.5 + percW / 2 - margin / 1280.0;
@@ -19,7 +20,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	savedFov = 60;
 	savedVis = 8;
 	savedUseVis = true;
-	res = 0;
+	res = 2;
 	config->movementSpeed = 1;
 	config->sensitivity = 1;
 	config->fov = savedFov;
@@ -52,7 +53,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	subtitle.setString("Resolution");
 	subtitleHeight = subtitle.getLocalBounds().height / 720;
 
-	resPos = startY + 70 / 720.0;
+	resPos = startY + 65 / 720.0;
 
 	nextResButton.init(window, ">", 0.54, resPos + 45.0 / 720, 17 / 1280.0, 17 / 720.0, 20, ALIGN_RIGHT);
 	nextResButton.setButtonColor(sf::Color::Transparent);
@@ -99,7 +100,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	labelFov.setFont(f);
 	labelFov.setCharacterSize(h3);
 	labelFov.setFillColor(sf::Color::Black);
-	labelFov.setString("FOV");
+	labelFov.setString("Field of View");
 	labelEnableShadows.setFont(f);
 	labelEnableShadows.setCharacterSize(h3);
 	labelEnableShadows.setFillColor(sf::Color::Black);
@@ -120,9 +121,23 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	bounds = labelDistance.getLocalBounds();
 	labelDistance.setOrigin(bounds.left, bounds.top);
 
-	/*saveButton = Button();
-	leaveButton = Button();
-	redoButton = Button();*/
+	float buttonHeight = 25 / 720.0, buttonWidth = 70 / 1280.0;
+	saveButton.init(window, "Save", 0.5, endY - buttonHeight, buttonWidth, buttonHeight, h3, ALIGN_CENTER);
+	saveButton.setBorder(1 / 720.0);
+	saveButton.setButtonColor(sf::Color::Black);
+	saveButton.setButtonHoverColor(sf::Color::Transparent);
+	saveButton.setTextHoverColor(sf::Color::Black);
+	leaveButton.init(window, "Leave", startX, endY - buttonHeight, buttonWidth, buttonHeight, h3, ALIGN_RIGHT);
+	leaveButton.setBorder(1 / 720.0);
+	leaveButton.setButtonColor(sf::Color(81, 126, 214));
+	leaveButton.setButtonHoverColor(sf::Color::Transparent);
+	leaveButton.setTextHoverColor(sf::Color(81, 126, 214));
+	restartButton.init(window, "Restart", endX, endY - buttonHeight, buttonWidth, buttonHeight, h3, ALIGN_LEFT);
+	restartButton.setBorder(1 / 720.0);
+	restartButton.setButtonColor(sf::Color(81, 126, 214));
+	restartButton.setButtonHoverColor(sf::Color::Transparent);
+	restartButton.setTextHoverColor(sf::Color(81, 126, 214));
+
 
 
 	Settings::reset();
@@ -190,7 +205,7 @@ void Settings::draw(sf::Vector2i mouse) {
 	window->draw(labelFov);
 	window->draw(labelEnableShadows);
 	window->draw(labelDistance);
-	printf("%f\n", movementSlider.getValue());
+	//printf("%f\n", movementSlider.getValue());
 
 	// Block shadow field if unchecked
 	if (!visibilityCheckbox.getValue()) {
@@ -201,7 +216,11 @@ void Settings::draw(sf::Vector2i mouse) {
 	}
 
 	// Draw extra buttons
-	
+	saveButton.draw(mouse, true);
+	if (inGame) {
+		leaveButton.draw(mouse, true);
+		restartButton.draw(mouse, true);
+	}
 
 	/* Margin showcase
 	sf::RectangleShape first(sf::Vector2f(100, 200));
@@ -235,6 +254,8 @@ void Settings::save() {
 
 	window->setSize(sf::Vector2u(resolutions[res].w, resolutions[res].h));
 	window->setView(sf::View(sf::FloatRect(0, 0, resolutions[res].w, resolutions[res].h)));
+
+	Settings::toggle();
 }
 
 bool Settings::visible() {
@@ -246,6 +267,10 @@ void Settings::toggle() {
 	Settings::reset();
 }
 
+void Settings::gameToggle() {
+	inGame = !inGame;
+}
+
 void Settings::mouseClick(sf::Vector2i mouse) {
 	if (!settingsWindow.getGlobalBounds().contains(sf::Vector2f(mouse.x, mouse.y))) {
 		Settings::toggle();
@@ -254,6 +279,7 @@ void Settings::mouseClick(sf::Vector2i mouse) {
 	if (Settings::isInside(mouse, closeButton, closeButton.getLocalBounds())) Settings::toggle();
 	if (nextResButton.isInside(mouse)) nextRes();
 	if (prevResButton.isInside(mouse)) prevRes();
+	if (saveButton.isInside(mouse)) Settings::save();
 }
 
 void Settings::handleEvent(sf::Event event) {
@@ -262,10 +288,6 @@ void Settings::handleEvent(sf::Event event) {
 	case sf::Event::MouseButtonPressed:
 		if (event.mouseButton.button == sf::Mouse::Left)
 			Settings::mouseClick(click);
-		break;
-	case sf::Event::KeyPressed:
-		if (event.key.code == sf::Keyboard::Enter) Settings::save();
-
 		break;
 	}
 	movementSlider.handleEvent(event);
@@ -292,6 +314,14 @@ bool Settings::isInside(sf::Vector2i mouse, sf::Transformable obj, sf::FloatRect
 	sf::Vector2f scale = obj.getScale();
 	return mouse.x > pos.x && mouse.x < pos.x + bounds.width * scale.x &&
 		mouse.y > pos.y && mouse.y < pos.y + bounds.height * scale.y;
+}
+
+bool Settings::isInsideLeave(sf::Vector2i mouse) {
+	return leaveButton.isInside(mouse);
+}
+
+bool Settings::isInsideRestart(sf::Vector2i mouse) {
+	return restartButton.isInside(mouse);
 }
 
 void Settings::displayRes(sf::Vector2i mouse) {

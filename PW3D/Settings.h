@@ -27,7 +27,10 @@ public:
 	void draw(sf::Vector2i mouse);
 	bool visible();
 	void toggle();
+	void gameToggle();
 	void handleEvent(sf::Event event);
+	bool isInsideLeave(sf::Vector2i mouse);
+	bool isInsideRestart(sf::Vector2i mouse);
 
 	Resolution getResolution();
 	Configuration* getConfig();
@@ -36,6 +39,7 @@ public:
 private:
 	sf::RenderWindow* window;
 	bool active;
+	bool inGame;
 	float percW;
 	float percH;
 	float startX;
@@ -57,9 +61,9 @@ private:
 
 	const int NUM_RES = 3;
 	Resolution resolutions[3] = {
-		{1280, 720},
+		{640, 360},
 		{960, 540},
-		{640, 360}
+		{1280, 720}
 	};
 	int res;
 
@@ -111,7 +115,7 @@ private:
 
 	Button saveButton;
 	Button leaveButton;
-	Button redoButton;
+	Button restartButton;
 	sf::Text closeButton;
 };
 

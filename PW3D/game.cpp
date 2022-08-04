@@ -73,12 +73,23 @@ int loop() {
         sf::Event event;
         while (window->pollEvent(event)) {
             // Universal events (Regardless of settings visibility)
-            if (event.type == sf::Event::Closed) {
+            sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
+            switch (event.type) {
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    if (settings->isInsideLeave(click)) {
+                        settings->toggle();
+                        return 0;
+                    }
+                    if (settings->isInsideRestart(click)) printf("Restarting...\n");
+                }
+                break;
+            case sf::Event::Closed:
                 window->close();
                 return 0;
-            }
-            if (event.type == sf::Event::KeyPressed) {
+            case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Escape) settings->toggle();
+                break;
             }
 
             // Specific events (depending on settings visibility)
@@ -86,7 +97,7 @@ int loop() {
                 settings->handleEvent(event);
             }
             else {
-                if (event.key.code == sf::Keyboard::B) return 0;
+
             }
         }
 	}
