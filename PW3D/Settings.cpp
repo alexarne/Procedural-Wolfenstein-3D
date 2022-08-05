@@ -231,6 +231,8 @@ void Settings::draw(sf::Vector2i mouse) {
 	second.setFillColor(sf::Color::Black);
 	window->draw(first);
 	window->draw(second);*/
+
+	Settings::updateConfig();
 }
 
 void Settings::reset() {
@@ -282,6 +284,12 @@ void Settings::mouseClick(sf::Vector2i mouse) {
 	if (saveButton.isInside(mouse)) Settings::save();
 }
 
+void Settings::updateConfig() {
+	config->fov = fovSlider.getValue();
+	config->visibilityDepth = visibilitySlider.getValue();
+	config->useVisibility = visibilityCheckbox.getValue();
+}
+
 void Settings::handleEvent(sf::Event event) {
 	sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
 	switch (event.type) {
@@ -295,10 +303,6 @@ void Settings::handleEvent(sf::Event event) {
 	fovSlider.handleEvent(event);
 	visibilityCheckbox.handleEvent(event);
 	if (visibilityCheckbox.getValue()) visibilitySlider.handleEvent(event);
-
-	config->fov = fovSlider.getValue();
-	config->visibilityDepth = visibilitySlider.getValue();
-	config->useVisibility = visibilityCheckbox.getValue();
 }
 
 void Settings::prevRes() {

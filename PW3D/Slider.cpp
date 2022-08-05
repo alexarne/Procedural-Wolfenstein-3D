@@ -58,7 +58,10 @@ void Slider::handleEvent(sf::Event event) {
 	switch (event.type) {
 	case sf::Event::MouseButtonPressed:
 		if (event.mouseButton.button == sf::Mouse::Left)
-			if (isInside(click)) holdingHandle = true;
+			if (isInside(click)) {
+				holdingHandle = true;
+				Slider::updateValue(click);
+			}
 		break;
 	case sf::Event::MouseButtonReleased:
 		if (event.mouseButton.button == sf::Mouse::Left) {

@@ -53,6 +53,7 @@ private:
 	void reset();
 	void save();
 	void mouseClick(sf::Vector2i mouse);
+	void updateConfig();
 	void prevRes();
 	void nextRes();
 	void displayRes(sf::Vector2i mouse);
