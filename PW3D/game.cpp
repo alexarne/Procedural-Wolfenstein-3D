@@ -2,6 +2,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Settings.h"
+#include "Map.h"
 
 sf::RenderWindow* window;   // Pointer to the window
 Settings* settings;         // Pointer to the settings object
@@ -11,6 +12,9 @@ bool running;               // If the game is running
 bool settingsVisible;       // If settings are visible
 bool prevSettingsVisible;   // If settings were visible last game loop
 
+Map* map;
+int** worldMap;
+
 int game::start(sf::RenderWindow* win, Settings* set) {
     window = win;
     settings = set;
@@ -18,6 +22,9 @@ int game::start(sf::RenderWindow* win, Settings* set) {
     settingsVisible = false;
     prevSettingsVisible = false;
     config = settings->getConfig();
+    Map tempMap(window);
+    map = &tempMap;
+    worldMap = map->getMap();
 
     window->setMouseCursorVisible(false);
     int value = loop();
@@ -60,13 +67,14 @@ int loop() {
             }
         }
         window->draw(rect);
-        printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config->movementSpeed, config->sensitivity, config->fov, config->visibilityDepth, config->useVisibility ? "true" : "false", config->res);
+        //printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config->movementSpeed, config->sensitivity, config->fov, config->visibilityDepth, config->useVisibility ? "true" : "false", config->res);
         // Get player movement information
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W));
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A));
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S));
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D));
 
+        map->draw();
         settings->draw(mouse);
         window->display();
 
@@ -89,6 +97,7 @@ int loop() {
                 return 0;
             case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Escape) settings->toggle();
+                if (event.key.code == sf::Keyboard::M) map->toggleView();
                 break;
             }
 
