@@ -1,11 +1,12 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Player.h"
 
 class Map
 {
 public:
-	Map(sf::RenderWindow* window);
+	Map(sf::RenderWindow* window, Player* player);
 
 	void draw();
 	void toggleView();
@@ -14,15 +15,19 @@ public:
 	~Map();
 private:
 	sf::RenderWindow* window;
+	Player* player;
 	bool fullView;
 	int mapWidth;
 	int mapHeight;
 	int** worldMap;
-	void createMap();
+	int pixelsPerUnit;
 	int initSize();
-	sf::Image img;
+	void createWorldMap();
+	void createMapImage();
+	void drawMap();
+	sf::Image mapImage;
+	sf::Image drawnMap;
 	sf::Texture tex;
 	sf::Sprite sprite;
-	void updateImage();
 };
 

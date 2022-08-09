@@ -21,8 +21,8 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	savedVis = 8;
 	savedUseVis = true;
 	res = 2;
-	config->movementSpeed = 1;
-	config->sensitivity = 1;
+	config->movementSpeed = 2;
+	config->sensitivity = 0.003;
 	config->fov = savedFov;
 	config->visibilityDepth = savedVis;
 	config->useVisibility = savedUseVis;
@@ -83,7 +83,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	labelDistancePos = labelEnableShadowsPos + labelSpacing;
 
 	movementSlider = Slider(window, endX, labelMovementPos + sliderOffset, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
-	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
+	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, 0.0015, 0.0045, SLIDER_ALIGN);
 
 	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, 30, 170, SLIDER_ALIGN);
 	visibilityCheckbox = Checkbox(window, 0.5 + 3 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
@@ -137,8 +137,6 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	restartButton.setButtonColor(sf::Color(81, 126, 214));
 	restartButton.setButtonHoverColor(sf::Color::Transparent);
 	restartButton.setTextHoverColor(sf::Color(81, 126, 214));
-
-
 
 	Settings::reset();
 }

@@ -26,7 +26,6 @@ Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float 
 
 	sf::Vector2u windowSize = window->getSize();
 	background = sf::RectangleShape(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
-	handle = sf::RectangleShape(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
 	background.setPosition(windowSize.x * percX, windowSize.y * percY);
 	Slider::updateHandle();
 
@@ -39,8 +38,8 @@ Slider::Slider() {}
 
 void Slider::draw(sf::Vector2i mouse) {
 	sf::Vector2u windowSize = window->getSize();
+	handle = sf::RectangleShape(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
 	background.setSize(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
-	handle.setSize(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
 	background.setPosition(windowSize.x * percX, windowSize.y * percY);
 	bool currHover = holdingHandle || (isInside(mouse) && !sf::Mouse::isButtonPressed(sf::Mouse::Left));
 	bool hover = currHover || prevHover;	// If hover last game cycle, hover now to avoid flicker
@@ -93,7 +92,7 @@ bool Slider::isInside(sf::Vector2i mouse) {
 	return background.getGlobalBounds().contains(sf::Vector2f(mouse.x, mouse.y));
 }
 
-void Slider::setValue(float value) { 
+void Slider::setValue(float value) {
 	this->value = value;
 	if (this->value > to) this->value = to;
 	if (this->value < from) this->value = from;
