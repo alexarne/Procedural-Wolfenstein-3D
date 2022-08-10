@@ -5,6 +5,7 @@
 #include "Map.h"
 #include "Player.h"
 #include "assets.hpp"
+#include <array>
 
 namespace game {
 	int start(sf::RenderWindow* win, Settings* set);
@@ -12,4 +13,4 @@ namespace game {
 
 int loop();
 void drawScreen(int w, int h);
-void drawLine(sf::Image& screen, int x, int drawStart, int drawEnd, sf::Color color);
+void setPixel(sf::Uint8* screen, int x, int y, int w, sf::Color color);

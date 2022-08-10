@@ -38,6 +38,8 @@ int loop() {
     
     sf::Clock clock;
     float elapsedTime;
+    sf::Uint64 acc = 0;
+    int acc_counter = 0;
 
     sf::Text fpsCounter;
     fpsCounter.setFillColor(sf::Color::White);
@@ -47,15 +49,20 @@ int loop() {
     fpsCounter.setFont(f);
 
 	while (running) {
+        acc += clock.getElapsedTime().asMicroseconds();
+        if (++acc_counter > 10) {
+            fpsCounter.setString("FPS: " + std::to_string(10 * 1000000 / acc));
+            acc_counter = 0;
+            acc = 0;
+        }
         elapsedTime = clock.restart().asSeconds();
-		window->clear(sf::Color(90, 20, 20));
+		window->clear(sf::Color::Black);
 
         prevSettingsVisible = settingsVisible;
         settingsVisible = settings->visible();
 
         sf::Vector2i mouse = sf::Mouse::getPosition(*window);
         sf::Vector2u windowSize = window->getSize();
-
         // Get mouse movement information
         if (prevSettingsVisible != settingsVisible) {
             window->setMouseCursorVisible(settingsVisible);
@@ -82,7 +89,6 @@ int loop() {
         map->draw();
         settings->draw(mouse);
 
-        fpsCounter.setString("FPS: " + std::to_string(1 / elapsedTime));
         fpsCounter.setScale(windowSize.y / 720.0, windowSize.y / 720.0);
         fpsCounter.setOrigin(fpsCounter.getLocalBounds().left, fpsCounter.getLocalBounds().top);
         fpsCounter.setPosition(10, windowSize.y - fpsCounter.getLocalBounds().height * windowSize.y / 720.0 - 10);
@@ -114,6 +120,7 @@ int loop() {
                 if (event.key.code == sf::Keyboard::Escape) settings->toggle();
                 break;
             }
+            
 
             // Specific events (depending on settings visibility)
             if (settingsVisible) {
@@ -129,9 +136,16 @@ int loop() {
 }
 
 void drawScreen(int w, int h) {
-    sf::Image img;
-    img.create(w, h);
+    sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
+    sf::Texture screenTexture;
+    screenTexture.create(w, h);
+    screenTexture.setSmooth(true);
+    sf::Sprite screenSprite(screenTexture);
+
     for (int x = 0; x < w; x++) {
+        // Fill black
+        //for (int y = 0; y < h; y++) setPixel(screenPixels, x, y, w, sf::Color::Black);
+
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
         sf::Vector2f plane = player->getPlane(config->fov);
         sf::Vector2f dir = player->getDir();
@@ -232,18 +246,20 @@ void drawScreen(int w, int h) {
         if (side == 1) { color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5); }
 
         //draw the pixels of the stripe as a vertical line
-        drawLine(img, x, drawStart, drawEnd, color);
+        for (int y = drawStart; y <= drawEnd; y++) {
+            setPixel(screenPixels, x, y, w, color);
+        }
     }
-    sf::Texture tex;
-    tex.loadFromImage(img);
-    tex.setSmooth(true);
-    sf::RectangleShape rect(sf::Vector2f(w, h));
-    rect.setTexture(&tex);
-    window->draw(rect);
+
+    screenTexture.update(screenPixels);
+    window->draw(screenSprite);
+    delete[] screenPixels;
 }
 
-void drawLine(sf::Image &screen, int x, int drawStart, int drawEnd, sf::Color color) {
-    for (int i = drawStart; i <= drawEnd; i++) {
-        screen.setPixel(x, i, color);
-    }
+void setPixel(sf::Uint8* screen, int x, int y, int w, sf::Color color) {
+    int i = (y * w + x) * 4;
+    screen[i]     = color.r;
+    screen[i + 1] = color.g;
+    screen[i + 2] = color.b;
+    screen[i + 3] = color.a;
 }
