@@ -2,11 +2,12 @@
 
 #include <SFML/Graphics.hpp>
 #include "Player.h"
+#include "Settings.h"
 
 class Map
 {
 public:
-	Map(sf::RenderWindow* window, Player* player);
+	Map(sf::RenderWindow* window, Player* player, Settings* settings);
 
 	void draw();
 	void toggleView();
@@ -16,6 +17,7 @@ public:
 private:
 	sf::RenderWindow* window;
 	Player* player;
+	Settings* settings;
 	bool fullView;
 	int mapWidth;
 	int mapHeight;

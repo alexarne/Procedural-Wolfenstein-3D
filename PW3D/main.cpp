@@ -29,7 +29,6 @@ int main()
 
     Configuration config;
     Settings settings(&window, &config);
-    settings.toggle();
     bool settingsVisible;
 
     while (window.isOpen()) {
@@ -63,7 +62,8 @@ int main()
                     sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
                     if (btn_startgame.isInside(click)) {
                         settings.gameToggle();
-                        game::start(&window, &settings);
+                        int val = game::start(&window, &settings);
+                        while (val == 1) val = game::start(&window, &settings);     // Return 1 for restart
                         settings.gameToggle();
                     }
                     if (btn_settings.isInside(click)) settings.toggle();

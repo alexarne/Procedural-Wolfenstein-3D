@@ -17,7 +17,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	endY = 0.5 + percH / 2 - margin / 720.0;
 
 	// Default settings
-	savedFov = 60;
+	savedFov = 66;
 	savedVis = 8;
 	savedUseVis = true;
 	res = 2;
@@ -82,12 +82,12 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	labelEnableShadowsPos = labelFovPos + labelSpacing;
 	labelDistancePos = labelEnableShadowsPos + labelSpacing;
 
-	movementSlider = Slider(window, endX, labelMovementPos + sliderOffset, sliderWidth, sliderHeight, 1, 10, SLIDER_ALIGN);
-	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, 0.0015, 0.0045, SLIDER_ALIGN);
+	movementSlider = Slider(window, endX, labelMovementPos + sliderOffset, sliderWidth, sliderHeight, config->movementSpeed * 0.2, config->movementSpeed * 1.8, SLIDER_ALIGN);
+	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, config->sensitivity * 0.2, config->sensitivity * 1.8, SLIDER_ALIGN);
 
-	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, 30, 170, SLIDER_ALIGN);
+	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, config->fov * 0.2, config->fov * 1.8, SLIDER_ALIGN);
 	visibilityCheckbox = Checkbox(window, 0.5 + 3 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
-	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, 1, 20, SLIDER_ALIGN);
+	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, config->visibilityDepth * 0.2, config->visibilityDepth * 1.8, SLIDER_ALIGN);
 
 	labelMovement.setFont(f);
 	labelMovement.setCharacterSize(h3);
@@ -240,6 +240,7 @@ void Settings::reset() {
 	visibilitySlider.setValue(savedVis);
 	visibilityCheckbox.setValue(savedUseVis);
 	res = config->res;
+	Settings::updateConfig();
 }
 
 void Settings::save() {

@@ -13,10 +13,12 @@ public:
 	void moveBackward(float dist);
 	void moveRight(float dist);
 	void moveLeft(float dist);
-	void turn(float rad);
+	void turnRight(float rad);
+	void lookUp(float rad);
 
 	sf::Vector2f getPos();
 	sf::Vector2f getDir();
+	sf::Vector2f getPlane(float fov);
 	float getAngle();
 
 	~Player();
@@ -24,6 +26,8 @@ private:
 	float x;
 	float y;
 	float angle;
+	float angleUp;
+	float heightOrigin;
 	sf::Vector2f dir;
 	sf::Vector2f plane;
 	void rotate_vec(sf::Vector2f &vec, float rad);

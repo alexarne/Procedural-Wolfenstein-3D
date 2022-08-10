@@ -2,9 +2,10 @@
 
 
 
-Map::Map(sf::RenderWindow* window, Player* player) {
+Map::Map(sf::RenderWindow* window, Player* player, Settings* settings) {
 	this->window = window;
 	this->player = player;
+	this->settings = settings;
 	fullView = false;
 	mapHeight = Map::initSize();
 	mapWidth = Map::initSize();
@@ -69,7 +70,7 @@ void Map::draw() {
 		int coverage = 2 * radius / scale;
 		sf::IntRect mask(playerPos.x * pixelsPerUnit - coverage / 2, playerPos.y * pixelsPerUnit - coverage / 2, coverage, coverage);
 		mapRegion.setTextureRect(mask);
-		mapRegion.setRotation(0);
+		mapRegion.setRotation(-1 * player->getAngle() * 180 / 3.14159265359);
 		p.setScale(1.4, 1.4);
 		bounds = p.getGlobalBounds();
 		p.setPosition(margin + radius - bounds.width / 2, margin + radius - bounds.height / 2);
