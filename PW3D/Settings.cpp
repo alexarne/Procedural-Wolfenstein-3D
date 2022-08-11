@@ -20,6 +20,8 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	savedFov = 66;
 	savedVis = 8;
 	savedUseVis = true;
+	savedQuality = 0;
+	quality = savedQuality;
 	res = 2;
 	config->movementSpeed = 2;
 	config->sensitivity = 0.003;
@@ -27,6 +29,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	config->visibilityDepth = savedVis;
 	config->useVisibility = savedUseVis;
 	config->res = res;
+	config->quality = quality + 1;
 	this->config = config;
 
 	h1 = 34;
@@ -53,28 +56,42 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	subtitle.setString("Resolution");
 	subtitleHeight = subtitle.getLocalBounds().height / 720;
 
-	resPos = startY + 65 / 720.0;
+	sliderOffset = -2 / 720.0;
+	subtitleSpacing = 45 / 720.0;
+	labelSpacing = 30 / 720.0;
 
-	nextResButton.init(window, ">", 0.54, resPos + 45.0 / 720, 17 / 1280.0, 17 / 720.0, 20, ALIGN_RIGHT);
+	resPos = startY + 60 / 720.0;
+
+	nextResButton.init(window, ">", 0.54, resPos + subtitleSpacing, 17 / 1280.0, 17 / 720.0, 20, ALIGN_RIGHT);
 	nextResButton.setButtonColor(sf::Color::Transparent);
 	nextResButton.setButtonHoverColor(sf::Color::Transparent);
 	nextResButton.setTextColor(sf::Color::Black);
 	nextResButton.setTextHoverColor(sf::Color::Black + sf::Color(100, 100, 100));
-	prevResButton.init(window, "<", 0.46, resPos + 45.0 / 720, 17 / 1280.0, 17 / 720.0, 20, ALIGN_LEFT);
+	prevResButton.init(window, "<", 0.46, resPos + subtitleSpacing, 17 / 1280.0, 17 / 720.0, 20, ALIGN_LEFT);
 	prevResButton.setButtonColor(sf::Color::Transparent);
 	prevResButton.setButtonHoverColor(sf::Color::Transparent);
 	prevResButton.setTextColor(sf::Color::Black);
 	prevResButton.setTextHoverColor(sf::Color::Black + sf::Color(100, 100, 100));
 
+	nextQualityButton.init(window, ">", 0.54, resPos + subtitleSpacing + labelSpacing, 17 / 1280.0, 17 / 720.0, 20, ALIGN_RIGHT);
+	nextQualityButton.setButtonColor(sf::Color::Transparent);
+	nextQualityButton.setButtonHoverColor(sf::Color::Transparent);
+	nextQualityButton.setTextColor(sf::Color::Black);
+	nextQualityButton.setTextHoverColor(sf::Color::Black + sf::Color(100, 100, 100));
+	prevQualityButton.init(window, "<", 0.46, resPos + subtitleSpacing + labelSpacing, 17 / 1280.0, 17 / 720.0, 20, ALIGN_LEFT);
+	prevQualityButton.setButtonColor(sf::Color::Transparent);
+	prevQualityButton.setButtonHoverColor(sf::Color::Transparent);
+	prevQualityButton.setTextColor(sf::Color::Black);
+	prevQualityButton.setTextHoverColor(sf::Color::Black + sf::Color(100, 100, 100));
+	qualityText.setFont(f);
+	qualityText.setCharacterSize(h3);
+	qualityText.setFillColor(sf::Color::Black);
+
 	float sliderHeight = 15 / 720.0, sliderWidth = 130 / 1280.0;
 	int SLIDER_ALIGN = ALIGN_LEFT;
 
-	sensPos = resPos + 90 / 720.0;
-	appPos = sensPos + 110 / 720.0;
-
-	sliderOffset = - 2 / 720.0;
-	subtitleSpacing = 45 / 720.0;
-	labelSpacing = 30 / 720.0;
+	sensPos = resPos + subtitleSpacing + 2 * labelSpacing;
+	appPos = sensPos + subtitleSpacing + 2 * labelSpacing;
 
 	labelMovementPos = sensPos + subtitleSpacing;
 	labelMousePos = labelMovementPos + labelSpacing;
@@ -240,6 +257,7 @@ void Settings::reset() {
 	visibilitySlider.setValue(savedVis);
 	visibilityCheckbox.setValue(savedUseVis);
 	res = config->res;
+	quality = savedQuality;
 	Settings::updateConfig();
 }
 
@@ -249,9 +267,11 @@ void Settings::save() {
 	config->fov = fovSlider.getValue();
 	config->visibilityDepth = visibilitySlider.getValue();
 	config->res = res;
+	config->quality = quality;
 	savedFov = fovSlider.getValue();
 	savedVis = visibilitySlider.getValue();
 	savedUseVis = visibilityCheckbox.getValue();
+	savedQuality = quality;
 
 	window->setSize(sf::Vector2u(resolutions[res].w, resolutions[res].h));
 	window->setView(sf::View(sf::FloatRect(0, 0, resolutions[res].w, resolutions[res].h)));
@@ -280,6 +300,8 @@ void Settings::mouseClick(sf::Vector2i mouse) {
 	if (Settings::isInside(mouse, closeButton, closeButton.getLocalBounds())) Settings::toggle();
 	if (nextResButton.isInside(mouse)) nextRes();
 	if (prevResButton.isInside(mouse)) prevRes();
+	if (nextQualityButton.isInside(mouse)) nextQuality();
+	if (prevQualityButton.isInside(mouse)) prevQuality();
 	if (saveButton.isInside(mouse)) Settings::save();
 }
 
@@ -287,6 +309,7 @@ void Settings::updateConfig() {
 	config->fov = fovSlider.getValue();
 	config->visibilityDepth = visibilitySlider.getValue();
 	config->useVisibility = visibilityCheckbox.getValue();
+	config->quality = quality + 1;
 }
 
 void Settings::handleEvent(sf::Event event) {
@@ -310,6 +333,14 @@ void Settings::prevRes() {
 
 void Settings::nextRes() {
 	if (++res >= NUM_RES) res = 0;
+}
+
+void Settings::prevQuality() {
+	if (++quality >= NUM_QUALITY) quality = 0;
+}
+
+void Settings::nextQuality() {
+	if (--quality < 0) quality = NUM_QUALITY - 1;
 }
 
 bool Settings::isInside(sf::Vector2i mouse, sf::Transformable obj, sf::FloatRect bounds) {
@@ -336,11 +367,20 @@ void Settings::displayRes(sf::Vector2i mouse) {
 	resText.setScale(sf::Vector2f(scale, scale));
 	sf::FloatRect bounds = resText.getLocalBounds();
 	resText.setOrigin(bounds.left, bounds.top);
-	resText.setPosition((float) windowSize.x / 2 - scale * (float) bounds.width / 2, (resPos + 46.0 / 720) * windowSize.y + subtitleHeight * scale);
+	resText.setPosition((float)windowSize.x / 2 - scale * (float)bounds.width / 2, (resPos + subtitleSpacing + 1.0 / 720) * windowSize.y + subtitleHeight * scale);
+
+	qualityText.setString(qualities[quality]);
+	qualityText.setScale(sf::Vector2f(scale, scale));
+	bounds = qualityText.getLocalBounds();
+	qualityText.setOrigin(bounds.left, bounds.top);
+	qualityText.setPosition((float)windowSize.x / 2 - scale * (float)bounds.width / 2, (resPos + subtitleSpacing + labelSpacing + 1.0 / 720) * windowSize.y + subtitleHeight * scale);
 
 	window->draw(resText);
 	nextResButton.draw(mouse, true);
 	prevResButton.draw(mouse, true);
+	window->draw(qualityText);
+	nextQualityButton.draw(mouse, true);
+	prevQualityButton.draw(mouse, true);
 }
 
 void Settings::drawTitle(sf::String title, float percY) {

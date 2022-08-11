@@ -17,6 +17,7 @@ struct Configuration {
 	float visibilityDepth;
 	bool useVisibility;
 	int res;
+	int quality;
 };
 
 class Settings
@@ -56,6 +57,8 @@ private:
 	void updateConfig();
 	void prevRes();
 	void nextRes();
+	void prevQuality();
+	void nextQuality();
 	void displayRes(sf::Vector2i mouse);
 	void drawTitle(sf::String subtitle, float percY);
 	bool isInside(sf::Vector2i mouse, sf::Transformable obj, sf::FloatRect bounds);
@@ -67,6 +70,15 @@ private:
 		{1280, 720}
 	};
 	int res;
+
+	const int NUM_QUALITY = 4;
+	const char* qualities[4] = {
+		"High",
+		"Medium",
+		"Low",
+		"Very Low"
+	};
+	int quality;
 
 	Configuration* config;
 
@@ -86,6 +98,10 @@ private:
 	float resPos;
 	Button nextResButton;
 	Button prevResButton;
+	sf::Text qualityText;
+	Button nextQualityButton;
+	Button prevQualityButton;
+	int savedQuality;
 
 	float sliderOffset;
 	float subtitleSpacing;
