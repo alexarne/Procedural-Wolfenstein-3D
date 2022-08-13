@@ -155,7 +155,6 @@
     <ClCompile Include="Checkbox.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -169,7 +168,6 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="align.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Settings.h" />

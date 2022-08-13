@@ -49,6 +49,12 @@ int loop() {
     f.loadFromMemory(&font, font_len);
     fpsCounter.setFont(f);
 
+    // Cant use sf::Keyboard::isKeyPressed() because that triggers antivirus software
+    bool W_PRESSED = false;
+    bool A_PRESSED = false;
+    bool S_PRESSED = false;
+    bool D_PRESSED = false;
+
 	while (running) {
         acc += clock.getElapsedTime().asSeconds();
         if (acc > 0.2) {
@@ -80,10 +86,10 @@ int loop() {
         //printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config->movementSpeed, config->sensitivity, config->fov, config->visibilityDepth, config->useVisibility ? "true" : "false", config->res);
         if (!settingsVisible) {
             // Get player movement information
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) player->moveForward(config->movementSpeed * elapsedTime);
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) player->moveLeft(config->movementSpeed * elapsedTime);
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) player->moveBackward(config->movementSpeed * elapsedTime);
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) player->moveRight(config->movementSpeed * elapsedTime);
+            if (W_PRESSED) player->moveForward(config->movementSpeed * elapsedTime);
+            if (A_PRESSED) player->moveLeft(config->movementSpeed * elapsedTime);
+            if (S_PRESSED) player->moveBackward(config->movementSpeed * elapsedTime);
+            if (D_PRESSED) player->moveRight(config->movementSpeed * elapsedTime);
         }
 
         drawScreen(windowSize.x, windowSize.y);
@@ -119,13 +125,24 @@ int loop() {
                 window->close();
                 return 0;
             case sf::Event::KeyPressed:
+                if (event.key.code == sf::Keyboard::W) W_PRESSED = true;
+                if (event.key.code == sf::Keyboard::A) A_PRESSED = true;
+                if (event.key.code == sf::Keyboard::S) S_PRESSED = true;
+                if (event.key.code == sf::Keyboard::D) D_PRESSED = true;
                 if (event.key.code == sf::Keyboard::Escape) settings->toggle();
+                break;
+            case sf::Event::KeyReleased:
+                if (event.key.code == sf::Keyboard::W) W_PRESSED = false;
+                if (event.key.code == sf::Keyboard::A) A_PRESSED = false;
+                if (event.key.code == sf::Keyboard::S) S_PRESSED = false;
+                if (event.key.code == sf::Keyboard::D) D_PRESSED = false;
                 break;
             }
             
             // Specific events (depending on settings visibility)
             if (settingsVisible) {
                 settings->handleEvent(event);
+                bool W_PRESSED = false;
             }
             else {
                 if (event.type == sf::Event::KeyPressed)
@@ -140,10 +157,6 @@ void drawScreen(int w_pre, int h_pre) {
     int w = (w_pre + config->quality - 1) / config->quality;
     int h = (h_pre + config->quality - 1) / config->quality;
     sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
-    sf::Texture screenTexture;
-    screenTexture.create(w, h);
-    screenTexture.setSmooth(false);
-    sf::Sprite screenSprite(screenTexture);
 
     for (int x = 0; x < w; x++) {
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
@@ -213,7 +226,7 @@ void drawScreen(int w_pre, int h_pre) {
         else           perpWallDist = (sideDist.y - deltaDist.y);
 
         //Calculate height of line to draw on screen
-        int lineHeight = (int)(h / perpWallDist);
+        int lineHeight = perpWallDist == 0 ? h : (int)(h / perpWallDist);
 
         //calculate lowest and highest pixel to fill in current stripe
         int drawStart = h / 2 - lineHeight / 2;
@@ -221,26 +234,40 @@ void drawScreen(int w_pre, int h_pre) {
         int drawEnd = h / 2 + lineHeight / 2;
         if (drawEnd >= h) drawEnd = h - 1;
 
-        //choose wall color
-        sf::Color color;
-        switch (worldMap[mapPos.y][mapPos.x]) {
-        case 1:
-            color = sf::Color::Blue;
-            break;
-        case 2:
-            color = sf::Color::Red;
-            break;
-        case 3:
-            color = sf::Color::Green;
-            break;
-        case 4:
-            color = sf::Color::Cyan;
-            break;
-        case 5:
-            color = sf::Color::Magenta;
-            break;
-        default: color = sf::Color::Yellow; break;  // yellow
+        for (int i = 0; i < drawStart; i++) setPixel(screenPixels, x, i, w, sf::Color::Black);
+        for (int i = drawEnd+1; i < h; i++) setPixel(screenPixels, x, i, w, sf::Color::Black);
+
+        //texturing calculations
+        //const sf::Image texture = getMapTexture(worldMap[mapPos.y][mapPos.x]);
+
+        //calculate value of wallX
+        double wallX; //where exactly the wall was hit
+        if (side == 0) wallX = pos.y + perpWallDist * rayDir.y;
+        else           wallX = pos.x + perpWallDist * rayDir.x;
+        wallX -= floor((wallX));
+
+        //x coordinate on the texture
+        int texX = int(wallX * double(TEXTURE_WIDTH));
+        if (side == 0 && rayDir.x > 0) texX = TEXTURE_WIDTH - texX - 1;
+        if (side == 1 && rayDir.y < 0) texX = TEXTURE_WIDTH - texX - 1;
+
+        // How much to increase the texture coordinate per screen pixel
+        double step = 1.0 * TEXTURE_HEIGHT / lineHeight;
+        // Starting texture coordinate
+        double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
+        for (int y = drawStart; y < drawEnd; y++) {
+            // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
+            int texY = (int)texPos % (TEXTURE_HEIGHT - 1);
+            texPos += step;
+            sf::Color color = getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY);
+            //make color darker for y-sides
+            if (side == 1) color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            setPixel(screenPixels, x, y, w, color);
         }
+
+        /*
+        //choose wall color
+        sf::Color color = getMapColor(worldMap[mapPos.y][mapPos.x]);
 
         //give x and y sides different brightness
         if (side == 1) { color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5); }
@@ -253,12 +280,10 @@ void drawScreen(int w_pre, int h_pre) {
             else {
                 setPixel(screenPixels, x, y, w, sf::Color::Black);
             }
-        }
+        }*/
     }
 
-    screenTexture.update(screenPixels);
-    screenSprite.setScale(config->quality, config->quality);
-    window->draw(screenSprite);
+    drawBuffer(screenPixels, w, h);
     delete[] screenPixels;
 }
 
@@ -268,4 +293,14 @@ void setPixel(sf::Uint8* screen, int x, int y, int w, sf::Color color) {
     screen[i + 1] = color.g;
     screen[i + 2] = color.b;
     screen[i + 3] = color.a;
+}
+
+void drawBuffer(sf::Uint8* buffer, int w, int h) {
+    sf::Texture screenTexture;
+    screenTexture.create(w, h);
+    screenTexture.setSmooth(false);
+    sf::Sprite screenSprite(screenTexture);
+    screenTexture.update(buffer);
+    screenSprite.setScale(config->quality, config->quality);
+    window->draw(screenSprite);
 }

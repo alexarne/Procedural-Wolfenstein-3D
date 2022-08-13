@@ -25,6 +25,8 @@ public:
 private:
 	float x;
 	float y;
+	int w;
+	int h;
 	float angle;
 	float angleUp;
 	float heightOrigin;

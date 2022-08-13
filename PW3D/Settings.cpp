@@ -103,7 +103,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	sensitivitySlider = Slider(window, endX, labelMousePos + sliderOffset, sliderWidth, sliderHeight, config->sensitivity * 0.2, config->sensitivity * 1.8, SLIDER_ALIGN);
 
 	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, config->fov * 0.2, config->fov * 1.8, SLIDER_ALIGN);
-	visibilityCheckbox = Checkbox(window, 0.5 + 3 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
+	visibilityCheckbox = Checkbox(window, 0.5 + 2 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
 	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, config->visibilityDepth * 0.2, config->visibilityDepth * 1.8, SLIDER_ALIGN);
 
 	labelMovement.setFont(f);
@@ -121,11 +121,11 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	labelEnableShadows.setFont(f);
 	labelEnableShadows.setCharacterSize(h3);
 	labelEnableShadows.setFillColor(sf::Color::Black);
-	labelEnableShadows.setString("Enable Shadows");
+	labelEnableShadows.setString("Enable Fog");
 	labelDistance.setFont(f);
 	labelDistance.setCharacterSize(h3);
 	labelDistance.setFillColor(sf::Color::Black);
-	labelDistance.setString("Shadow Depth");
+	labelDistance.setString("Fog Depth");
 
 	sf::FloatRect bounds = labelMovement.getLocalBounds();
 	labelMovement.setOrigin(bounds.left, bounds.top);
