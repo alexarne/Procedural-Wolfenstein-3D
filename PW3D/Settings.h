@@ -4,6 +4,7 @@
 #include "Slider.h"
 #include "Checkbox.h"
 #include "Button.h"
+#include "Assets.hpp"
 
 struct Resolution {
 	int w;

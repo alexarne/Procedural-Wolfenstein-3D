@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include "Player.h"
 #include "Settings.h"
-#include "assets.hpp"
+#include "Assets.hpp"
 
 class Map
 {

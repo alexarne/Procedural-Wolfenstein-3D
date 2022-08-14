@@ -1,7 +1,5 @@
 #include "Slider.h"
 
-
-
 Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float from, float to, int ALIGN) {
 	window = win;
 	percX = x;

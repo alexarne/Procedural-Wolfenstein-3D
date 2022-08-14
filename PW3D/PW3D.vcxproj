@@ -153,19 +153,19 @@
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Checkbox.cpp" />
-    <ClCompile Include="game.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="assets.cpp" />
+    <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Slider.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="assets.hpp" />
+    <ClInclude Include="Assets.hpp" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Checkbox.h" />
-    <ClInclude Include="game.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="align.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Map.h" />

@@ -14,11 +14,12 @@ public:
 	void moveRight(float dist);
 	void moveLeft(float dist);
 	void turnRight(float rad);
-	void lookUp(float rad);
+	void lookUp(float amt);
 
 	sf::Vector2f getPos();
 	sf::Vector2f getDir();
 	sf::Vector2f getPlane(float fov);
+	int getHeightOrigin(int h);
 	float getAngle();
 
 	~Player();
@@ -28,7 +29,6 @@ private:
 	int w;
 	int h;
 	float angle;
-	float angleUp;
 	float heightOrigin;
 	sf::Vector2f dir;
 	sf::Vector2f plane;

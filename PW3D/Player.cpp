@@ -6,7 +6,6 @@ Player::Player(float x, float y) {
 	angle = 0;
 	dir = sf::Vector2f(0, -1);
 	plane = sf::Vector2f(1, 0);
-	angleUp = 0;
 	heightOrigin = 0.5;
 }
 
@@ -40,11 +39,10 @@ void Player::turnRight(float rad) {
 	rotate_vec(plane, rad);
 }
 
-void Player::lookUp(float rad) {
-	angleUp += rad;
-	if (angleUp > 1.57079632679) angleUp = 1.57079632679;
-	if (angleUp < -1.57079632679) angleUp = -1.57079632679;
-	heightOrigin = 0.5 + 0.2 * tan(angleUp);
+void Player::lookUp(float amt) {
+	heightOrigin += amt;
+	if (heightOrigin > 1) heightOrigin = 1;
+	if (heightOrigin < 0) heightOrigin = 0;
 }
 
 sf::Vector2f Player::getPos() {
@@ -63,6 +61,10 @@ sf::Vector2f Player::getPlane(float fov) {
 
 float Player::getAngle() {
 	return angle;
+}
+
+int Player::getHeightOrigin(int h) {
+	return heightOrigin * h;
 }
 
 void Player::rotate_vec(sf::Vector2f &vec, float rad) {

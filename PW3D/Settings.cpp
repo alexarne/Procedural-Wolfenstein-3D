@@ -1,8 +1,4 @@
 #include "Settings.h"
-#include <iostream>
-#include "Slider.h"
-#include "assets.hpp"
-#include <string>
 
 Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	window = win;

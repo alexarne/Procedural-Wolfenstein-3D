@@ -1,4 +1,4 @@
-#include "game.h"
+#include "Game.h"
 
 sf::RenderWindow* window;   // Pointer to the window
 Settings* settings;         // Pointer to the settings object
@@ -12,14 +12,14 @@ Map* map;
 int** worldMap;
 Player* player;
 
-int game::start(sf::RenderWindow* win, Settings* set) {
+int Game::start(sf::RenderWindow* win, Settings* set) {
     window = win;
     settings = set;
     running = true;
     settingsVisible = false;
     prevSettingsVisible = false;
     config = settings->getConfig();
-    Player tempPlayer(12, 12);
+    Player tempPlayer(11.5, 12);
     player = &tempPlayer;
     Map tempMap(window, player, settings);
     map = &tempMap;
@@ -109,18 +109,6 @@ int loop() {
             // Universal events (Regardless of settings visibility)
             sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
             switch (event.type) {
-            case sf::Event::MouseButtonPressed:
-                if (event.mouseButton.button == sf::Mouse::Left) {
-                    if (settings->isInsideLeave(click)) {
-                        settings->toggle();
-                        return 0;
-                    }
-                    if (settings->isInsideRestart(click)) {
-                        settings->toggle();
-                        return 1;
-                    }
-                }
-                break;
             case sf::Event::Closed:
                 window->close();
                 return 0;
@@ -142,9 +130,27 @@ int loop() {
             // Specific events (depending on settings visibility)
             if (settingsVisible) {
                 settings->handleEvent(event);
-                bool W_PRESSED = false;
+                if (event.type == sf::Event::MouseButtonPressed) {
+                    if (event.mouseButton.button == sf::Mouse::Left) {
+                        if (settings->isInsideLeave(click)) {
+                            settings->toggle();
+                            return 0;
+                        }
+                        if (settings->isInsideRestart(click)) {
+                            settings->toggle();
+                            return 1;
+                        }
+                    }
+                }
             }
             else {
+                if (event.type == sf::Event::LostFocus) {
+                    settings->toggle();
+                    W_PRESSED = false;
+                    A_PRESSED = false;
+                    S_PRESSED = false;
+                    D_PRESSED = false;
+                }
                 if (event.type == sf::Event::KeyPressed)
                     if (event.key.code == sf::Keyboard::M) map->toggleView();
             }
@@ -156,6 +162,7 @@ int loop() {
 void drawScreen(int w_pre, int h_pre) {
     int w = (w_pre + config->quality - 1) / config->quality;
     int h = (h_pre + config->quality - 1) / config->quality;
+    int heightOrigin = player->getHeightOrigin(h);
     sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
 
     for (int x = 0; x < w; x++) {
@@ -229,16 +236,13 @@ void drawScreen(int w_pre, int h_pre) {
         int lineHeight = perpWallDist == 0 ? h : (int)(h / perpWallDist);
 
         //calculate lowest and highest pixel to fill in current stripe
-        int drawStart = h / 2 - lineHeight / 2;
+        int drawStart = heightOrigin - lineHeight / 2;
         if (drawStart < 0) drawStart = 0;
-        int drawEnd = h / 2 + lineHeight / 2;
+        int drawEnd = heightOrigin + lineHeight / 2;
         if (drawEnd >= h) drawEnd = h - 1;
 
-        for (int i = 0; i < drawStart; i++) setPixel(screenPixels, x, i, w, sf::Color::Black);
-        for (int i = drawEnd+1; i < h; i++) setPixel(screenPixels, x, i, w, sf::Color::Black);
-
-        //texturing calculations
-        //const sf::Image texture = getMapTexture(worldMap[mapPos.y][mapPos.x]);
+        for (int i = 0; i < drawStart; i++) setPixel(screenPixels, x, i, w, h, sf::Color::Black);
+        for (int i = drawEnd; i < h; i++) setPixel(screenPixels, x, i, w, h, sf::Color::Black);
 
         //calculate value of wallX
         double wallX; //where exactly the wall was hit
@@ -254,40 +258,24 @@ void drawScreen(int w_pre, int h_pre) {
         // How much to increase the texture coordinate per screen pixel
         double step = 1.0 * TEXTURE_HEIGHT / lineHeight;
         // Starting texture coordinate
-        double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
-        for (int y = drawStart; y < drawEnd; y++) {
+        double texPos = (drawStart - heightOrigin + lineHeight / 2) * step;
+        for (int y = drawStart; y <= drawEnd; y++) {
             // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-            int texY = (int)texPos % (TEXTURE_HEIGHT - 1);
+            int texY = (int)texPos % TEXTURE_HEIGHT;
             texPos += step;
-            sf::Color color = getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY);
+            sf::Color color = Assets::getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY);
             //make color darker for y-sides
             if (side == 1) color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
-            setPixel(screenPixels, x, y, w, color);
+            setPixel(screenPixels, x, y, w, h, color);
         }
-
-        /*
-        //choose wall color
-        sf::Color color = getMapColor(worldMap[mapPos.y][mapPos.x]);
-
-        //give x and y sides different brightness
-        if (side == 1) { color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5); }
-
-        //draw the pixels of the stripe as a vertical line
-        for (int y = 0; y < h; y++) {
-            if (y >= drawStart && y <= drawEnd) {
-                setPixel(screenPixels, x, y, w, color);
-            }
-            else {
-                setPixel(screenPixels, x, y, w, sf::Color::Black);
-            }
-        }*/
     }
 
     drawBuffer(screenPixels, w, h);
     delete[] screenPixels;
 }
 
-void setPixel(sf::Uint8* screen, int x, int y, int w, sf::Color color) {
+void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
+    if (x < 0 || x >= w || y < 0 || y >= h) return;
     int i = (y * w + x) * 4;
     screen[i]     = color.r;
     screen[i + 1] = color.g;

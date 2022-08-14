@@ -1,17 +1,19 @@
-#include "assets.hpp"
+#include "Assets.hpp"
 
-sf::Color getMapColor(int tile) {
+sf::Color Assets::getMapColor(int tile) {
 	if (tile > NUM_TEXTURES) return sf::Color::Magenta;
 	if (tile == 0) return sf::Color::White;
 	return MAP_COLORS[tile - 1];
 }
 
-sf::Color getTextureColor(int id, int x, int y) {
+sf::Color Assets::getTextureColor(int tile, int x, int y) {
+	if (tile-- > NUM_TEXTURES || tile < 0) tile = 0;
+	int index = (TEXTURE_WIDTH * y + x) * 4;
 	return sf::Color(
-		textures[0][TEXTURE_WIDTH * y + x],
-		textures[0][TEXTURE_WIDTH * y + x + 1],
-		textures[0][TEXTURE_WIDTH * y + x + 2],
-		textures[0][TEXTURE_WIDTH * y + x + 3]
+		textures[tile][index],
+		textures[tile][index + 1],
+		textures[tile][index + 2],
+		textures[tile][index + 3]
 	);
 }
 

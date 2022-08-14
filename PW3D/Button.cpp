@@ -1,6 +1,4 @@
 #include "Button.h"
-#include "assets.hpp"
-#include <iostream>
 
 Button::Button() {
 }

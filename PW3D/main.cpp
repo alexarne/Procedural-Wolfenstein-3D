@@ -1,13 +1,4 @@
 #include "main.h"
-#include "Button.h"
-#include "game.h"
-#include "Settings.h"
-
-#include <iostream>
-
-using std::cout;
-using std::endl;
-using std::to_string;
 
 int main()
 {
@@ -61,8 +52,8 @@ int main()
                     sf::Vector2i click(event.mouseButton.x, event.mouseButton.y);
                     if (btn_startgame.isInside(click)) {
                         settings.gameToggle();
-                        int val = game::start(&window, &settings);
-                        while (val == 1) val = game::start(&window, &settings);     // Return 1 for restart
+                        int val = Game::start(&window, &settings);
+                        while (val == 1) val = Game::start(&window, &settings);     // Return 1 for restart
                         settings.gameToggle();
                     }
                     if (btn_settings.isInside(click)) settings.toggle();
