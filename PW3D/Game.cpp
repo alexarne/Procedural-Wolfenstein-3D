@@ -291,4 +291,8 @@ void drawBuffer(sf::Uint8* buffer, int w, int h) {
     screenTexture.update(buffer);
     screenSprite.setScale(config->quality, config->quality);
     window->draw(screenSprite);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7abe8dde0b83e18cbc88c66b107642297f1d66b2
