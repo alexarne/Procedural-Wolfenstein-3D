@@ -20,7 +20,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	quality = savedQuality;
 	res = 2;
 	config->movementSpeed = 2;
-	config->sensitivity = 0.003;
+	config->sensitivity = 0.002;
 	config->fov = savedFov;
 	config->visibilityDepth = savedVis;
 	config->useVisibility = savedUseVis;

@@ -160,11 +160,66 @@ int loop() {
 }
 
 void drawScreen(int w_pre, int h_pre) {
+    sf::Clock clock;
     int w = (w_pre + config->quality - 1) / config->quality;
     int h = (h_pre + config->quality - 1) / config->quality;
     int heightOrigin = player->getHeightOrigin(h);
     sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
+    sf::Int64 pre = clock.getElapsedTime().asMicroseconds();
+    // FLOOR & CEILING CASTING
+    for (int y = 0; y < h; y++) {
+        sf::Vector2f dir = player->getDir();
+        sf::Vector2f plane = player->getPlane(config->fov);
+        sf::Vector2f pos = player->getPos();
 
+        // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+        sf::Vector2f rayDir0(dir.x - plane.x, dir.y - plane.y);
+        sf::Vector2f rayDir1(dir.x + plane.x, dir.y + plane.y);
+
+        // Current y position compared to the center of the screen (the horizon)
+        int p = y - heightOrigin;
+        if (y < heightOrigin) p *= -1;
+
+        // Vertical position of the camera.
+        float posZ = 0.5 * h;
+
+        // Horizontal distance from the camera to the floor for the current row.
+        // 0.5 is the z position exactly in the middle between floor and ceiling.
+        float rowDistance = posZ / p;
+
+        // calculate the real world step vector we have to add for each x (parallel to camera plane)
+        // adding step by step avoids multiplications with a weight in the inner loop
+        float floorStepX = rowDistance * (rayDir1.x - rayDir0.x) / w;
+        float floorStepY = rowDistance * (rayDir1.y - rayDir0.y) / w;
+
+        // real world coordinates of the leftmost column. This will be updated as we step to the right.
+        float floorX = pos.x + rowDistance * rayDir0.x;
+        float floorY = pos.y + rowDistance * rayDir0.y;
+
+        for (int x = 0; x < w; ++x) {
+            // the cell coord is simply got from the integer parts of floorX and floorY
+            int cellX = (int)(floorX);
+            int cellY = (int)(floorY);
+
+            // get the texture coordinate from the fractional part
+            int tx = (int)(TEXTURE_WIDTH * (floorX - cellX)) % TEXTURE_WIDTH;
+            int ty = (int)(TEXTURE_HEIGHT * (floorY - cellY)) % TEXTURE_HEIGHT;
+
+            floorX += floorStepX;
+            floorY += floorStepY;
+
+            // choose texture and draw the pixel
+            int floorTexture = 2;
+            int ceilingTexture = 8;
+            sf::Color color;
+
+            color = Assets::getTextureColor(y < heightOrigin ? ceilingTexture : floorTexture, tx, ty);
+            color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            setPixel(screenPixels, x, y, w, h, color);
+        }
+    }
+    sf::Int64 floorceil = clock.getElapsedTime().asMicroseconds();
+    // WALL CASTING
     for (int x = 0; x < w; x++) {
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
         sf::Vector2f plane = player->getPlane(config->fov);
@@ -241,9 +296,6 @@ void drawScreen(int w_pre, int h_pre) {
         int drawEnd = heightOrigin + lineHeight / 2;
         if (drawEnd >= h) drawEnd = h - 1;
 
-        for (int i = 0; i < drawStart; i++) setPixel(screenPixels, x, i, w, h, sf::Color::Black);
-        for (int i = drawEnd; i < h; i++) setPixel(screenPixels, x, i, w, h, sf::Color::Black);
-
         //calculate value of wallX
         double wallX; //where exactly the wall was hit
         if (side == 0) wallX = pos.y + perpWallDist * rayDir.y;
@@ -269,9 +321,16 @@ void drawScreen(int w_pre, int h_pre) {
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
-
+    sf::Int64 wall = clock.getElapsedTime().asMicroseconds();
     drawBuffer(screenPixels, w, h);
     delete[] screenPixels;
+    sf::Int64 tot = clock.getElapsedTime().asMicroseconds();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) printf("pre: %lld\nfloor + ceil: %lld\nwall: %lld\ndraw: %lld\ntot: %lld\n\n", 
+        pre, 
+        floorceil - pre, 
+        wall - floorceil, 
+        tot - wall,
+        tot);
 }
 
 void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
@@ -291,8 +350,4 @@ void drawBuffer(sf::Uint8* buffer, int w, int h) {
     screenTexture.update(buffer);
     screenSprite.setScale(config->quality, config->quality);
     window->draw(screenSprite);
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 7abe8dde0b83e18cbc88c66b107642297f1d66b2
