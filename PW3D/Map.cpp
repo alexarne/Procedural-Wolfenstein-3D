@@ -81,9 +81,10 @@ void Map::draw() {
 }
 
 void Map::seenWall(float x0, float y0, float x1, float y1) {
-	//drawnMap.setPixel(pixelsPerUnit * x1, pixelsPerUnit * y1, sf::Color::Red);
-	for (float i = 0; i < 1; i += 0.1) {
-		drawnMap.setPixel(pixelsPerUnit * (x0 + i * x1), pixelsPerUnit * (y0 + i * y1), sf::Color::Red);
+	float incr = 1 / (pixelsPerUnit * sqrt(x1 * x1 + y1 * y1));
+	sf::Color c = sf::Color(200, 200, 200);
+	for (float i = 0; i < 1; i += incr) {
+		drawnMap.setPixel(pixelsPerUnit * (x0 + i * x1), pixelsPerUnit * (y0 + i * y1), c);
 	}
 }
 

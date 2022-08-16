@@ -103,7 +103,7 @@ int loop() {
         window->draw(fpsCounter);
 
         window->display();
-
+        
         sf::Event event;
         while (window->pollEvent(event)) {
             // Universal events (Regardless of settings visibility)
