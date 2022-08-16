@@ -13,6 +13,7 @@ public:
 	void draw();
 	void toggleView();
 	int** getMap();
+	void seenWall(float x0, float y0, float x1, float y1);
 
 	~Map();
 private:

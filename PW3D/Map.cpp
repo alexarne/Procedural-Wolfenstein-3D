@@ -29,7 +29,6 @@ Map::~Map() {
 }
 
 void Map::draw() {
-	Map::drawMap();
 	tex.update(drawnMap);
 	tex.setSmooth(false);
 	sprite.setTexture(tex);
@@ -49,7 +48,8 @@ void Map::draw() {
 		bounds = sprite.getGlobalBounds();
 		sf::Vector2f playerPos = player->getPos();
 		sf::Vector2f scopeScale = sprite.getScale();
-		p.setPosition(bounds.left + playerPos.x * scopeScale.x * pixelsPerUnit, bounds.top + playerPos.y * scopeScale.y * pixelsPerUnit);
+		sf::FloatRect pBounds = p.getGlobalBounds();
+		p.setPosition(bounds.left + playerPos.x * scopeScale.x * pixelsPerUnit - pBounds.width / 2, bounds.top + playerPos.y * scopeScale.y * pixelsPerUnit - pBounds.height / 2);
 		window->draw(sprite);
 		window->draw(p);
 	}
@@ -77,8 +77,14 @@ void Map::draw() {
 		window->draw(mapRegion, &tex);
 		window->draw(p);
 	}
+	Map::drawMap();
+}
 
-
+void Map::seenWall(float x0, float y0, float x1, float y1) {
+	//drawnMap.setPixel(pixelsPerUnit * x1, pixelsPerUnit * y1, sf::Color::Red);
+	for (float i = 0; i < 1; i += 0.1) {
+		drawnMap.setPixel(pixelsPerUnit * (x0 + i * x1), pixelsPerUnit * (y0 + i * y1), sf::Color::Red);
+	}
 }
 
 void Map::toggleView() {

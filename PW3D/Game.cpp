@@ -158,14 +158,19 @@ int loop() {
 	}
 	return 0;
 }
-
+//sf::Clock c;
+//sf::Int64 pixelCalls;
 void drawScreen(int w_pre, int h_pre) {
-    sf::Clock clock;
+    //c.restart();
+    //pixelCalls = 0;
     int w = (w_pre + config->quality - 1) / config->quality;
     int h = (h_pre + config->quality - 1) / config->quality;
     int heightOrigin = player->getHeightOrigin(h);
     sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
-    sf::Int64 pre = clock.getElapsedTime().asMicroseconds();
+    for (int i = 0; i < w * h * 4; i++) {
+        screenPixels[i] = 0;
+    }
+    //sf::Int64 pre = c.getElapsedTime().asMicroseconds();
     // FLOOR & CEILING CASTING
     for (int y = 0; y < h; y++) {
         sf::Vector2f dir = player->getDir();
@@ -218,7 +223,7 @@ void drawScreen(int w_pre, int h_pre) {
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
-    sf::Int64 floorceil = clock.getElapsedTime().asMicroseconds();
+    //sf::Int64 floorceil = c.getElapsedTime().asMicroseconds();
     // WALL CASTING
     for (int x = 0; x < w; x++) {
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
@@ -302,6 +307,8 @@ void drawScreen(int w_pre, int h_pre) {
         else           wallX = pos.x + perpWallDist * rayDir.x;
         wallX -= floor((wallX));
 
+        map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
+
         //x coordinate on the texture
         int texX = int(wallX * double(TEXTURE_WIDTH));
         if (side == 0 && rayDir.x > 0) texX = TEXTURE_WIDTH - texX - 1;
@@ -321,22 +328,24 @@ void drawScreen(int w_pre, int h_pre) {
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
-    sf::Int64 wall = clock.getElapsedTime().asMicroseconds();
+    //sf::Int64 wall = c.getElapsedTime().asMicroseconds();
     drawBuffer(screenPixels, w, h);
     delete[] screenPixels;
-    sf::Int64 tot = clock.getElapsedTime().asMicroseconds();
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) printf("pre: %lld\nfloor + ceil: %lld\nwall: %lld\ndraw: %lld\ntot: %lld\n\n", 
-        pre, 
-        floorceil - pre, 
-        wall - floorceil, 
-        tot - wall,
-        tot);
+    //sf::Int64 tot = c.getElapsedTime().asMicroseconds();
+    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) printf("pre: %lld\nfloor + ceil: %lld\nwall: %lld\ndraw: %lld\ntot: %lld\nsetPixel #s: %lld\n\n", 
+    //    pre, 
+    //    floorceil - pre, 
+    //    wall - floorceil, 
+    //    tot - wall,
+    //    tot,
+    //    pixelCalls);
 }
 
 void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
+    //pixelCalls++;
     if (x < 0 || x >= w || y < 0 || y >= h) return;
     int i = (y * w + x) * 4;
-    screen[i]     = color.r;
+    screen[i] = color.r;
     screen[i + 1] = color.g;
     screen[i + 2] = color.b;
     screen[i + 3] = color.a;
