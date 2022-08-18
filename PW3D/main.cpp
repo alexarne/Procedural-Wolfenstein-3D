@@ -1,7 +1,6 @@
 #include "main.h"
 
-int main()
-{
+int main() {
     sf::ContextSettings context;
     context.antialiasingLevel = 8;
 

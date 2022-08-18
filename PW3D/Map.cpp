@@ -74,8 +74,9 @@ void Map::draw() {
 		p.setScale(1.4, 1.4);
 		bounds = p.getGlobalBounds();
 		p.setPosition(margin + radius - bounds.width / 2, margin + radius - bounds.height / 2);
-		window->draw(mapRegion, &tex);
+		window->draw(mapRegion);
 		window->draw(p);
+
 	}
 	Map::drawMap();
 }
