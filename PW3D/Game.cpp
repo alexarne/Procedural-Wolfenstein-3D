@@ -172,6 +172,7 @@ void drawScreen(int w_pre, int h_pre) {
     }
     //sf::Int64 pre = c.getElapsedTime().asMicroseconds();
     // FLOOR & CEILING CASTING
+    /*
     for (int y = 0; y < h; y++) {
         sf::Vector2f dir = player->getDir();
         sf::Vector2f plane = player->getPlane(config->fov);
@@ -223,6 +224,7 @@ void drawScreen(int w_pre, int h_pre) {
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
+    */
     //sf::Int64 floorceil = c.getElapsedTime().asMicroseconds();
     // WALL CASTING
     for (int x = 0; x < w; x++) {
@@ -322,9 +324,8 @@ void drawScreen(int w_pre, int h_pre) {
             // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
             int texY = (int)texPos % TEXTURE_HEIGHT;
             texPos += step;
-            sf::Color color = Assets::getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY);
             //make color darker for y-sides
-            if (side == 1) color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            sf::Color color = Assets::getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY, side == 1);
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
