@@ -12,6 +12,9 @@ Map* map;
 int** worldMap;
 Player* player;
 
+sf::VertexArray pixels(sf::Lines, 0);
+sf::RenderStates* state;
+
 int Game::start(sf::RenderWindow* win, Settings* set) {
     window = win;
     settings = set;
@@ -24,6 +27,11 @@ int Game::start(sf::RenderWindow* win, Settings* set) {
     Map tempMap(window, player, settings);
     map = &tempMap;
     worldMap = map->getMap();
+
+    sf::Texture texture;
+    texture.loadFromMemory(textures_file, textures_file_len);
+    sf::RenderStates st(&texture);
+    state = &st;
 
     window->setMouseCursorVisible(false);
     int value = loop();
@@ -158,18 +166,17 @@ int loop() {
 	}
 	return 0;
 }
+
 //sf::Clock c;
 //sf::Int64 pixelCalls;
+
 void drawScreen(int w_pre, int h_pre) {
     //c.restart();
     //pixelCalls = 0;
     int w = (w_pre + config->quality - 1) / config->quality;
     int h = (h_pre + config->quality - 1) / config->quality;
     int heightOrigin = player->getHeightOrigin(h);
-    sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
-    for (int i = 0; i < w * h * 4; i++) {
-        screenPixels[i] = 0;
-    }
+    pixels.resize(0);
     //sf::Int64 pre = c.getElapsedTime().asMicroseconds();
     // FLOOR & CEILING CASTING
     /*
@@ -252,7 +259,7 @@ void drawScreen(int w_pre, int h_pre) {
         int stepY;
 
         bool hit = false; // was there a wall hit?
-        int side; // was a NS or a EW wall hit?
+        bool shadowed; // was a NS or a EW wall hit?
 
         //calculate step and initial sideDist
         if (rayDir.x < 0) {
@@ -279,19 +286,19 @@ void drawScreen(int w_pre, int h_pre) {
             {
                 sideDist.x += deltaDist.x;
                 mapPos.x += stepX;
-                side = 0;
+                shadowed = false;
             }
             else {
                 sideDist.y += deltaDist.y;
                 mapPos.y += stepY;
-                side = 1;
+                shadowed = true;
             }
             //Check if ray has hit a wall
             if (worldMap[mapPos.y][mapPos.x] > 0) hit = true;
         }
 
         //Calculate distance projected on camera direction (Euclidean distance would give fisheye effect!)
-        if (side == 0) perpWallDist = (sideDist.x - deltaDist.x);
+        if (!shadowed) perpWallDist = (sideDist.x - deltaDist.x);
         else           perpWallDist = (sideDist.y - deltaDist.y);
 
         //Calculate height of line to draw on screen
@@ -299,23 +306,22 @@ void drawScreen(int w_pre, int h_pre) {
 
         //calculate lowest and highest pixel to fill in current stripe
         int drawStart = heightOrigin - lineHeight / 2;
-        if (drawStart < 0) drawStart = 0;
         int drawEnd = heightOrigin + lineHeight / 2;
-        if (drawEnd >= h) drawEnd = h - 1;
 
         //calculate value of wallX
         double wallX; //where exactly the wall was hit
-        if (side == 0) wallX = pos.y + perpWallDist * rayDir.y;
+        if (!shadowed) wallX = pos.y + perpWallDist * rayDir.y;
         else           wallX = pos.x + perpWallDist * rayDir.x;
         wallX -= floor((wallX));
 
-        map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
+        //map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
 
         //x coordinate on the texture
         int texX = int(wallX * double(TEXTURE_WIDTH));
-        if (side == 0 && rayDir.x > 0) texX = TEXTURE_WIDTH - texX - 1;
-        if (side == 1 && rayDir.y < 0) texX = TEXTURE_WIDTH - texX - 1;
-
+        bool invert = (shadowed && rayDir.y > 0) || (!shadowed && rayDir.x < 0);
+        if (invert) texX = TEXTURE_WIDTH - 1 - texX;
+        //if (shadowed) texX++;
+        /*
         // How much to increase the texture coordinate per screen pixel
         double step = 1.0 * TEXTURE_HEIGHT / lineHeight;
         // Starting texture coordinate
@@ -324,14 +330,23 @@ void drawScreen(int w_pre, int h_pre) {
             // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
             int texY = (int)texPos % TEXTURE_HEIGHT;
             texPos += step;
-            //make color darker for y-sides
-            sf::Color color = Assets::getTextureColor(worldMap[mapPos.y][mapPos.x], texX, texY, side == 1);
-            setPixel(screenPixels, x, y, w, h, color);
-        }
+            pixels.append(sf::Vertex(
+                sf::Vector2f(x, y),
+                sf::Color::White,
+                Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, texY, shadowed)
+            ));
+        }*/
+        pixels.append(sf::Vertex(
+            sf::Vector2f(x, drawStart),
+            Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, 0, shadowed)
+        ));
+        pixels.append(sf::Vertex(
+            sf::Vector2f(x, drawEnd),
+            Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, TEXTURE_HEIGHT - 1, shadowed)
+        ));
     }
     //sf::Int64 wall = c.getElapsedTime().asMicroseconds();
-    drawBuffer(screenPixels, w, h);
-    delete[] screenPixels;
+    drawBuffer(NULL, w, h);
     //sf::Int64 tot = c.getElapsedTime().asMicroseconds();
     //if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) printf("pre: %lld\nfloor + ceil: %lld\nwall: %lld\ndraw: %lld\ntot: %lld\nsetPixel #s: %lld\n\n", 
     //    pre, 
@@ -353,6 +368,8 @@ void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
 }
 
 void drawBuffer(sf::Uint8* buffer, int w, int h) {
+    window->draw(pixels, *state);
+    return;
     sf::Texture screenTexture;
     screenTexture.create(w, h);
     screenTexture.setSmooth(false);
