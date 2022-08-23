@@ -30,13 +30,15 @@ Slider::Slider(sf::RenderWindow* win, float x, float y, float w, float h, float 
 	handleColor = sf::Color(70, 70, 70);
 	backgroundColor = sf::Color(120, 120, 120);
 	hoverAddColor = sf::Color(50, 50, 50);
+
+	handle = sf::RectangleShape(sf::Vector2f(10, 10));
 }
 
 Slider::Slider() {}
 
 void Slider::draw(sf::Vector2i mouse) {
 	sf::Vector2u windowSize = window->getSize();
-	handle = sf::RectangleShape(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
+	handle.setSize(sf::Vector2f(windowSize.y * percH, windowSize.y * percH));
 	background.setSize(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
 	background.setPosition(windowSize.x * percX, windowSize.y * percY);
 	bool currHover = holdingHandle || (isInside(mouse) && !sf::Mouse::isButtonPressed(sf::Mouse::Left));

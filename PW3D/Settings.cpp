@@ -151,6 +151,13 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 	restartButton.setButtonHoverColor(sf::Color::Transparent);
 	restartButton.setTextHoverColor(sf::Color(81, 126, 214));
 
+	// Initialize remaining objects (set properties dynamically at draw)
+	overlay = sf::RectangleShape(sf::Vector2f(10, 10));
+	overlay.setFillColor(sf::Color(0, 0, 0, 128));
+	settingsWindow = sf::RectangleShape(sf::Vector2f(10, 10));
+	shadowBlock = sf::RectangleShape(sf::Vector2f(10, 10));
+	shadowBlock.setFillColor(sf::Color(255, 255, 255, 150));
+
 	Settings::reset();
 }
 
@@ -161,9 +168,8 @@ void Settings::draw(sf::Vector2i mouse) {
 	float scale = windowSize.y / 720.0;
 
 	// Draw overlay and body
-	overlay = sf::RectangleShape(sf::Vector2f(windowSize.x, windowSize.y));
-	overlay.setFillColor(sf::Color(0, 0, 0, 128));
-	settingsWindow = sf::RectangleShape(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
+	overlay.setSize(sf::Vector2f(windowSize.x, windowSize.y));
+	settingsWindow.setSize(sf::Vector2f(windowSize.x * percW, windowSize.y * percH));
 	settingsSize = settingsWindow.getSize();
 	settingsWindow.setPosition((float)(windowSize.x - settingsSize.x) / 2, (float)(windowSize.y - settingsSize.y) / 2);
 	window->draw(overlay);
@@ -220,9 +226,8 @@ void Settings::draw(sf::Vector2i mouse) {
 
 	// Block shadow field if unchecked
 	if (!visibilityCheckbox.getValue()) {
-		shadowBlock = sf::RectangleShape(sf::Vector2f(windowSize.x * (endX - startX), labelDistance.getLocalBounds().height * scale - windowSize.y * sliderOffset));
+		shadowBlock.setSize(sf::Vector2f(windowSize.x * (endX - startX), labelDistance.getLocalBounds().height * scale - windowSize.y * sliderOffset));
 		shadowBlock.setPosition(windowSize.x * startX, windowSize.y * (labelDistancePos + sliderOffset));
-		shadowBlock.setFillColor(sf::Color(255, 255, 255, 150));
 		window->draw(shadowBlock);
 	}
 

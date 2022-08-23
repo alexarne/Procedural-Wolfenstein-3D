@@ -8,9 +8,13 @@ sf::Color Assets::getMapColor(int tile) {
 
 sf::Vector2f Assets::getTextureCoords(int tile, int x, int y, bool shadow) {
 	if (tile-- > NUM_TEXTURES || tile < 0) tile = 0;
-	x += (tile % TEXTURES_PER_ROW) * 2 * TEXTURE_WIDTH + (shadow ? TEXTURE_WIDTH : 0);
-	y += (tile / TEXTURES_PER_ROW) * TEXTURE_HEIGHT;
-	return sf::Vector2f(x, y);
+	sf::Vector2i texture_tile(
+		tile * TEXTURE_WIDTH * 2 % (TEXTURES_PER_ROW * TEXTURE_WIDTH * 2) + (shadow ? TEXTURE_WIDTH : 0),
+		(tile / TEXTURES_PER_ROW) * TEXTURE_HEIGHT
+	);
+	x += texture_tile.x;
+	y += texture_tile.y;
+	return sf::Vector2f((float) x + 0.5, (float) y);	// + 0.5 because otherwise neighbouring pixels might be interpreted as the same pixel (but I don't know why)
 }
 
 sf::Color Assets::getTextureColor(int tile, int x, int y, bool shadow) {

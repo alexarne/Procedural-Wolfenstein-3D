@@ -318,24 +318,9 @@ void drawScreen(int w_pre, int h_pre) {
 
         //x coordinate on the texture
         int texX = int(wallX * double(TEXTURE_WIDTH));
-        bool invert = (shadowed && rayDir.y > 0) || (!shadowed && rayDir.x < 0);
+        bool invert = (shadowed && rayDir.y > 0) || (!shadowed && rayDir.x < 0);    // Top and right sides
         if (invert) texX = TEXTURE_WIDTH - 1 - texX;
-        //if (shadowed) texX++;
-        /*
-        // How much to increase the texture coordinate per screen pixel
-        double step = 1.0 * TEXTURE_HEIGHT / lineHeight;
-        // Starting texture coordinate
-        double texPos = (drawStart - heightOrigin + lineHeight / 2) * step;
-        for (int y = drawStart; y <= drawEnd; y++) {
-            // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-            int texY = (int)texPos % TEXTURE_HEIGHT;
-            texPos += step;
-            pixels.append(sf::Vertex(
-                sf::Vector2f(x, y),
-                sf::Color::White,
-                Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, texY, shadowed)
-            ));
-        }*/
+
         pixels.append(sf::Vertex(
             sf::Vector2f(x, drawStart),
             Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, 0, shadowed)
