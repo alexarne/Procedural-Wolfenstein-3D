@@ -32,6 +32,7 @@ private:
 	sf::Image mapImage;
 	sf::Image drawnMap;
 	sf::Texture tex;
-	sf::Sprite sprite;
+	sf::Sprite mapSprite;
+	sf::CircleShape p;
 };
 

@@ -30,53 +30,69 @@ Map::~Map() {
 
 void Map::draw() {
 	tex.update(drawnMap);
-	tex.setSmooth(false);
-	sprite.setTexture(tex);
+	tex.setSmooth(true);
 	sf::Vector2u windowSize = window->getSize();
 	float scale = windowSize.y / 720.0;
-	sprite.setScale(scale, scale);
 
 	// Player indicator
-	sf::CircleShape p(3 * scale);
+	p.setRadius(3 * scale);
 	p.setFillColor(sf::Color(255, 102, 0));
 
 	if (fullView) {
-		sf::FloatRect bounds = sprite.getGlobalBounds();
-		if (bounds.height > windowSize.y) sprite.setScale(scale * 0.9 * windowSize.y / bounds.height, scale * 0.9 * windowSize.y / bounds.height);
-		bounds = sprite.getGlobalBounds();
-		sprite.setPosition(windowSize.x / 2 - bounds.width / 2, windowSize.y / 2 - bounds.height / 2);
-		bounds = sprite.getGlobalBounds();
+		mapSprite.setTexture(tex);
+		mapSprite.setScale(scale, scale);
+		sf::FloatRect bounds = mapSprite.getGlobalBounds();
+		if (bounds.height > windowSize.y) mapSprite.setScale(scale * 0.9 * windowSize.y / bounds.height, scale * 0.9 * windowSize.y / bounds.height);
+		bounds = mapSprite.getGlobalBounds();
+		mapSprite.setPosition(windowSize.x / 2 - bounds.width / 2, windowSize.y / 2 - bounds.height / 2);
+		bounds = mapSprite.getGlobalBounds();
 		sf::Vector2f playerPos = player->getPos();
-		sf::Vector2f scopeScale = sprite.getScale();
+		sf::Vector2f scopeScale = mapSprite.getScale();
 		sf::FloatRect pBounds = p.getGlobalBounds();
 		p.setPosition(bounds.left + playerPos.x * scopeScale.x * pixelsPerUnit - pBounds.width / 2, bounds.top + playerPos.y * scopeScale.y * pixelsPerUnit - pBounds.height / 2);
-		window->draw(sprite);
+		
+		window->draw(mapSprite);
 		window->draw(p);
 	}
 	else {
-		tex.setSmooth(true);
 		float radius = 90 * scale;
-		int margin = 20 * scale;
-		sf::CircleShape mapRegion(radius);
-		sprite.setPosition(margin, margin);
-		sf::FloatRect bounds = mapRegion.getGlobalBounds();
-		mapRegion.setOrigin(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
-		mapRegion.setPosition(margin + radius, margin + radius);
-		mapRegion.setPointCount(60);
-		mapRegion.setOutlineColor(sf::Color(30, 30, 30));
-		mapRegion.setOutlineThickness(6 * scale);
-		mapRegion.setTexture(&tex);
+		float outlineThickness = 6 * scale;
+		float outlineRadius = radius + outlineThickness;
+		float margin = 20 * scale;
 		sf::Vector2f playerPos = player->getPos();
-		int coverage = 2 * radius / scale;
-		sf::IntRect mask(playerPos.x * pixelsPerUnit - coverage / 2, playerPos.y * pixelsPerUnit - coverage / 2, coverage, coverage);
-		mapRegion.setTextureRect(mask);
-		mapRegion.setRotation(-1 * player->getAngle() * 180 / 3.14159265359);
-		p.setScale(1.4, 1.4);
-		bounds = p.getGlobalBounds();
-		p.setPosition(margin + radius - bounds.width / 2, margin + radius - bounds.height / 2);
-		window->draw(mapRegion);
-		window->draw(p);
+		int coverage = radius / scale * pixelsPerUnit / 16;
+		const int circlePoints = 60;
+		float origin = margin + radius;
 
+		sf::Color outlineColor(30, 30, 30);
+		sf::Vertex circleMap[circlePoints + 2];
+		sf::Vertex circleOutline[circlePoints + 2];
+		circleMap[0] = sf::Vertex(sf::Vector2f(origin, origin), sf::Vector2f(playerPos.x * pixelsPerUnit, playerPos.y * pixelsPerUnit));
+		circleOutline[0] = sf::Vertex(sf::Vector2f(origin, origin), outlineColor);
+		float rot = player->getAngle();
+		float step = 2 * 3.14159265359 / circlePoints;
+		for (int i = 1; i <= circlePoints; i++) {
+			float angle = (i - 1) * step;
+			circleMap[i] = sf::Vertex(
+				sf::Vector2f(origin + radius * cos(angle), origin + radius * sin(angle)),
+				sf::Vector2f(pixelsPerUnit * playerPos.x + coverage * cos(angle + rot), pixelsPerUnit * playerPos.y + coverage * sin(angle + rot))
+			);
+			circleOutline[i] = sf::Vertex(
+				sf::Vector2f(origin + outlineRadius * cos(angle), origin + outlineRadius * sin(angle)),
+				outlineColor
+			);
+		}
+		circleMap[circlePoints + 1] = circleMap[1];
+		circleOutline[circlePoints + 1] = circleOutline[1];
+
+		p.setScale(1.4, 1.4);
+		sf::FloatRect bounds = p.getGlobalBounds();
+		p.setPosition(margin + radius - bounds.width / 2, margin + radius - bounds.height / 2);
+
+		sf::RenderStates st(&tex);
+		window->draw(circleOutline, circlePoints + 2, sf::TriangleFan);
+		window->draw(circleMap, circlePoints + 2, sf::TriangleFan, st);
+		window->draw(p);
 	}
 	Map::drawMap();
 }
