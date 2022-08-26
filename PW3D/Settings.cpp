@@ -100,7 +100,7 @@ Settings::Settings(sf::RenderWindow* win, Configuration* config) {
 
 	fovSlider = Slider(window, endX, labelFovPos + sliderOffset, sliderWidth, sliderHeight, config->fov * 0.2, config->fov * 1.8, SLIDER_ALIGN);
 	visibilityCheckbox = Checkbox(window, 0.5 + 2 / 1280.0, labelEnableShadowsPos + sliderOffset, true, ALIGN_RIGHT);
-	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, config->visibilityDepth * 0.2, config->visibilityDepth * 1.8, SLIDER_ALIGN);
+	visibilitySlider = Slider(window, endX, labelDistancePos + sliderOffset, sliderWidth, sliderHeight, config->visibilityDepth * 0.3, config->visibilityDepth * 1.7, SLIDER_ALIGN);
 
 	labelMovement.setFont(f);
 	labelMovement.setCharacterSize(h3);

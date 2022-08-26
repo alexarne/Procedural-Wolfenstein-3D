@@ -24,7 +24,7 @@ int Game::start(sf::RenderWindow* win, Settings* set) {
     config = settings->getConfig();
     Player tempPlayer(11.5, 12);
     player = &tempPlayer;
-    Map tempMap(window, player, settings);
+    Map tempMap(window, player, config);
     map = &tempMap;
     worldMap = map->getMap();
 
@@ -167,19 +167,16 @@ int loop() {
 	return 0;
 }
 
-//sf::Clock c;
-//sf::Int64 pixelCalls;
-
 void drawScreen(int w_pre, int h_pre) {
-    //c.restart();
-    //pixelCalls = 0;
     int w = (w_pre + config->quality - 1) / config->quality;
-    int h = (h_pre + config->quality - 1) / config->quality;
+    //int h = (h_pre + config->quality - 1) / config->quality;
+    int h = h_pre;
     int heightOrigin = player->getHeightOrigin(h);
     pixels.resize(0);
-    //sf::Int64 pre = c.getElapsedTime().asMicroseconds();
+
     // FLOOR & CEILING CASTING
     /*
+    sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
     for (int y = 0; y < h; y++) {
         sf::Vector2f dir = player->getDir();
         sf::Vector2f plane = player->getPlane(config->fov);
@@ -224,15 +221,12 @@ void drawScreen(int w_pre, int h_pre) {
             // choose texture and draw the pixel
             int floorTexture = 2;
             int ceilingTexture = 8;
-            sf::Color color;
-
-            color = Assets::getTextureColor(y < heightOrigin ? ceilingTexture : floorTexture, tx, ty);
-            color = sf::Color(color.r * 0.5, color.g * 0.5, color.b * 0.5);
+            sf::Color color = Assets::getTextureColor(y < heightOrigin ? ceilingTexture : floorTexture, tx, ty, y > heightOrigin);
             setPixel(screenPixels, x, y, w, h, color);
         }
     }
     */
-    //sf::Int64 floorceil = c.getElapsedTime().asMicroseconds();
+
     // WALL CASTING
     for (int x = 0; x < w; x++) {
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
@@ -321,29 +315,32 @@ void drawScreen(int w_pre, int h_pre) {
         bool invert = (shadowed && rayDir.y > 0) || (!shadowed && rayDir.x < 0);    // Top and right sides
         if (invert) texX = TEXTURE_WIDTH - 1 - texX;
 
-        pixels.append(sf::Vertex(
-            sf::Vector2f(x, drawStart),
-            Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, 0, shadowed)
-        ));
-        pixels.append(sf::Vertex(
-            sf::Vector2f(x, drawEnd),
-            Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, TEXTURE_HEIGHT - 1, shadowed)
-        ));
+        sf::Color color = sf::Color::White;
+        if (config->useVisibility) {
+            float intensity = 1 - perpWallDist / config->visibilityDepth;
+            if (intensity > 1) intensity = 1;
+            if (intensity < 0) intensity = 0;
+            color.a = intensity * 255;
+        }
+        for (int i = 0; i < config->quality; i++) {
+            pixels.append(sf::Vertex(
+                sf::Vector2f(config->quality * x + i, drawStart),
+                color,
+                Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, 0, shadowed)
+            ));
+            pixels.append(sf::Vertex(
+                sf::Vector2f(config->quality * x + i, drawEnd),
+                color,
+                Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, TEXTURE_HEIGHT - 1, shadowed)
+            ));
+        }
     }
-    //sf::Int64 wall = c.getElapsedTime().asMicroseconds();
-    drawBuffer(NULL, w, h);
-    //sf::Int64 tot = c.getElapsedTime().asMicroseconds();
-    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) printf("pre: %lld\nfloor + ceil: %lld\nwall: %lld\ndraw: %lld\ntot: %lld\nsetPixel #s: %lld\n\n", 
-    //    pre, 
-    //    floorceil - pre, 
-    //    wall - floorceil, 
-    //    tot - wall,
-    //    tot,
-    //    pixelCalls);
+
+    //drawBuffer(screenPixels, w, h);
+    window->draw(pixels, *state);
 }
 
 void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
-    //pixelCalls++;
     if (x < 0 || x >= w || y < 0 || y >= h) return;
     int i = (y * w + x) * 4;
     screen[i] = color.r;
@@ -353,8 +350,6 @@ void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
 }
 
 void drawBuffer(sf::Uint8* buffer, int w, int h) {
-    window->draw(pixels, *state);
-    return;
     sf::Texture screenTexture;
     screenTexture.create(w, h);
     screenTexture.setSmooth(false);

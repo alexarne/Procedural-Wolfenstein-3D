@@ -2,7 +2,7 @@
 
 
 
-Map::Map(sf::RenderWindow* window, Player* player, Settings* settings) {
+Map::Map(sf::RenderWindow* window, Player* player, Configuration* settings) {
 	this->window = window;
 	this->player = player;
 	this->settings = settings;
