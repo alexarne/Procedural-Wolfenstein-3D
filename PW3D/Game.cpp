@@ -229,6 +229,8 @@ void drawScreen(int w_pre, int h_pre) {
 
     // WALL CASTING
     for (int x = 0; x < w; x++) {
+        const float cameraHeight = 0.5f; // height of player camera(1.0 is ceiling, 0.0 is floor)
+
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
         sf::Vector2f plane = player->getPlane(config->fov);
         sf::Vector2f dir = player->getDir();
@@ -273,9 +275,19 @@ void drawScreen(int w_pre, int h_pre) {
             sideDist.y = (mapPos.y + 1.0 - pos.y) * deltaDist.y;
         }
 
+        int lineHeight; // height of wall to draw on the screen at each distance
+        int ceilingPixel = 0; // position of ceiling pixel on the screen
+        int floorPixel = h; // position of ground pixel on the screen
+        int ceilingTexture = 12;
+        int floorTexture = 39;
+        sf::Color currIntensity = sf::Color::White;
+        sf::Color prevIntensity = sf::Color::White;
+        sf::Vector2i currPoint;
+        sf::Vector2i prevPoint(pos.x, pos.y);
+
         //perform DDA
         while (!hit) {
-            //jump to next map square, either in x-direction, or in y-direction
+            // Jump to next map square, either in x-direction, or in y-direction
             if (sideDist.x < sideDist.y)
             {
                 sideDist.x += deltaDist.x;
@@ -287,28 +299,72 @@ void drawScreen(int w_pre, int h_pre) {
                 mapPos.y += stepY;
                 shadowed = true;
             }
-            //Check if ray has hit a wall
+
+            //Calculate distance projected on camera direction (Euclidean distance would give fisheye effect!)
+            if (!shadowed) perpWallDist = (sideDist.x - deltaDist.x);
+            else           perpWallDist = (sideDist.y - deltaDist.y);
+
+            //Calculate height of line to draw on screen
+            lineHeight = (int) (h / perpWallDist);
+
+            if (config->useVisibility) {
+                prevIntensity = currIntensity;
+                float intensity = 1 - perpWallDist / config->visibilityDepth;
+                if (intensity > 1) intensity = 1;
+                if (intensity < 0) intensity = 0;
+                currIntensity.a = intensity * 255;
+            }
+
+            //calculate value of wallX
+            double wallX = pos.x + perpWallDist * rayDir.x;
+            double wallY = pos.y + perpWallDist * rayDir.y;
+            wallX -= floor((wallX));
+            wallY -= floor((wallY));
+            int texX = int(wallX * double(TEXTURE_WIDTH));
+            int texY = int(wallY * double(TEXTURE_HEIGHT));
+            currPoint = sf::Vector2i(texX, texY);
+
+            // add floor
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), prevIntensity,
+                Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
+            ));
+            floorPixel = int(heightOrigin + lineHeight * cameraHeight);
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), currIntensity, 
+                Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
+            ));
+
+            // add ceiling
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), prevIntensity, 
+                Assets::getTextureCoords(ceilingTexture, prevPoint.x, prevPoint.y, true)
+            ));
+            ceilingPixel = int(heightOrigin - lineHeight * (1.0f - cameraHeight));
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), currIntensity, 
+                Assets::getTextureCoords(ceilingTexture, currPoint.x, currPoint.y, true)
+            ));
+
+            prevPoint = currPoint;
+            if (prevPoint.x == 0) prevPoint.x = TEXTURE_WIDTH - 1;
+            if (prevPoint.x == TEXTURE_WIDTH - 1) prevPoint.x = 0;
+            if (prevPoint.y == 0) prevPoint.y = TEXTURE_HEIGHT - 1;
+            if (prevPoint.y == TEXTURE_HEIGHT - 1) prevPoint.y = 0;
+
+            // Check if ray has hit a wall
             if (worldMap[mapPos.y][mapPos.x] > 0) hit = true;
+            //if (config->useVisibility && perpWallDist > config->visibilityDepth) break;
         }
-
-        //Calculate distance projected on camera direction (Euclidean distance would give fisheye effect!)
-        if (!shadowed) perpWallDist = (sideDist.x - deltaDist.x);
-        else           perpWallDist = (sideDist.y - deltaDist.y);
-
-        //Calculate height of line to draw on screen
-        int lineHeight = perpWallDist == 0 ? h : (int)(h / perpWallDist);
+        if (!hit) continue;
 
         //calculate lowest and highest pixel to fill in current stripe
         int drawStart = heightOrigin - lineHeight / 2;
         int drawEnd = heightOrigin + lineHeight / 2;
 
+        //map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
+
         //calculate value of wallX
-        double wallX; //where exactly the wall was hit
+        double wallX;   //where exactly the wall was hit
         if (!shadowed) wallX = pos.y + perpWallDist * rayDir.y;
         else           wallX = pos.x + perpWallDist * rayDir.x;
         wallX -= floor((wallX));
-
-        //map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
 
         //x coordinate on the texture
         int texX = int(wallX * double(TEXTURE_WIDTH));
@@ -335,8 +391,6 @@ void drawScreen(int w_pre, int h_pre) {
             ));
         }
     }
-
-    //drawBuffer(screenPixels, w, h);
     window->draw(pixels, *state);
 }
 
