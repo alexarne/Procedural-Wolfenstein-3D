@@ -29,6 +29,8 @@ public:
 	void draw(sf::Vector2i mouse);
 	bool visible();
 	void toggle();
+	void toggleOn();
+	void toggleOff();
 	void gameToggle();
 	void handleEvent(sf::Event event);
 	bool isInsideLeave(sf::Vector2i mouse);

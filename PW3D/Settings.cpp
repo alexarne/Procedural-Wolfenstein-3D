@@ -289,6 +289,16 @@ void Settings::toggle() {
 	Settings::reset();
 }
 
+void Settings::toggleOn() {
+	active = true;
+	Settings::reset();
+}
+
+void Settings::toggleOff() {
+	active = false;
+	Settings::reset();
+}
+
 void Settings::gameToggle() {
 	inGame = !inGame;
 }

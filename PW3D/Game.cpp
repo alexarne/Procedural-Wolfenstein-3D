@@ -92,6 +92,7 @@ int loop() {
             }
         }
         //printf("move: %f sens: %f fov: %f vis: %f useVis: %s res: %i\n", config->movementSpeed, config->sensitivity, config->fov, config->visibilityDepth, config->useVisibility ? "true" : "false", config->res);
+        
         if (!settingsVisible) {
             // Get player movement information
             if (W_PRESSED) player->moveForward(config->movementSpeed * elapsedTime);
@@ -120,7 +121,7 @@ int loop() {
             case sf::Event::Closed:
                 window->close();
                 return 0;
-            case sf::Event::KeyPressed:
+            /*case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::W) W_PRESSED = true;
                 if (event.key.code == sf::Keyboard::A) A_PRESSED = true;
                 if (event.key.code == sf::Keyboard::S) S_PRESSED = true;
@@ -132,7 +133,7 @@ int loop() {
                 if (event.key.code == sf::Keyboard::A) A_PRESSED = false;
                 if (event.key.code == sf::Keyboard::S) S_PRESSED = false;
                 if (event.key.code == sf::Keyboard::D) D_PRESSED = false;
-                break;
+                break;*/
             }
             
             // Specific events (depending on settings visibility)
@@ -158,11 +159,22 @@ int loop() {
                     A_PRESSED = false;
                     S_PRESSED = false;
                     D_PRESSED = false;
-                }
+                }/*
                 if (event.type == sf::Event::KeyPressed)
-                    if (event.key.code == sf::Keyboard::M) map->toggleView();
+                    if (event.key.code == sf::Keyboard::M) map->toggleView();*/
             }
         }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) W_PRESSED = true;
+        else W_PRESSED = false;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) A_PRESSED = true;
+        else A_PRESSED = false;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) S_PRESSED = true;
+        else S_PRESSED = false;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) D_PRESSED = true;
+        else D_PRESSED = false;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) settings->toggle();
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) map->toggleView();
 	}
 	return 0;
 }
@@ -323,23 +335,23 @@ void drawScreen(int w_pre, int h_pre) {
             int texX = int(wallX * double(TEXTURE_WIDTH));
             int texY = int(wallY * double(TEXTURE_HEIGHT));
             currPoint = sf::Vector2i(texX, texY);
-
+            sf::Color c = (mapPos.x + mapPos.y) % 2 == 0 ? sf::Color::Green : sf::Color::Cyan;
             // add floor
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), prevIntensity,
-                Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), c//,
+                //Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
             ));
             floorPixel = int(heightOrigin + lineHeight * cameraHeight);
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), currIntensity, 
-                Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), c//, 
+                //Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
             ));
 
             // add ceiling
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), prevIntensity, 
-                Assets::getTextureCoords(ceilingTexture, prevPoint.x, prevPoint.y, true)
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), c//, 
+                //Assets::getTextureCoords(ceilingTexture, prevPoint.x, prevPoint.y, true)
             ));
             ceilingPixel = int(heightOrigin - lineHeight * (1.0f - cameraHeight));
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), currIntensity, 
-                Assets::getTextureCoords(ceilingTexture, currPoint.x, currPoint.y, true)
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), c//, 
+                //Assets::getTextureCoords(ceilingTexture, currPoint.x, currPoint.y, true)
             ));
 
             prevPoint = currPoint;
@@ -355,15 +367,18 @@ void drawScreen(int w_pre, int h_pre) {
         if (!hit) continue;
 
         //calculate lowest and highest pixel to fill in current stripe
-        int drawStart = heightOrigin - lineHeight / 2;
+        int drawStart = heightOrigin - lineHeight / 2 - 1;
         int drawEnd = heightOrigin + lineHeight / 2;
 
         //map->seenWall(pos.x, pos.y, perpWallDist * rayDir.x, perpWallDist * rayDir.y);
 
         //calculate value of wallX
         double wallX;   //where exactly the wall was hit
-        if (!shadowed) wallX = pos.y + perpWallDist * rayDir.y;
-        else           wallX = pos.x + perpWallDist * rayDir.x;
+        double distX, distY;
+        distY = perpWallDist * rayDir.y;
+        distX = perpWallDist * rayDir.x;
+        if (!shadowed) wallX = pos.y + distY;
+        else           wallX = pos.x + distX;
         wallX -= floor((wallX));
 
         //x coordinate on the texture
@@ -373,7 +388,8 @@ void drawScreen(int w_pre, int h_pre) {
 
         sf::Color color = sf::Color::White;
         if (config->useVisibility) {
-            float intensity = 1 - perpWallDist / config->visibilityDepth;
+            float sqDist = distX * distX + distY * distY;
+            float intensity = 1 - sqDist / (config->visibilityDepth * config->visibilityDepth);
             if (intensity > 1) intensity = 1;
             if (intensity < 0) intensity = 0;
             color.a = intensity * 255;

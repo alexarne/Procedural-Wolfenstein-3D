@@ -38,9 +38,9 @@ int main() {
         while (window.pollEvent(event)) {
             // Universal events (Regardless of settings visibility)
             if (event.type == sf::Event::Closed) window.close();
-            if (event.type == sf::Event::KeyPressed) {
+            /*if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Escape) settings.toggle();
-            }
+            }*/
 
             // Specific events (depending on settings visibility)
             if (settingsVisible) {
@@ -60,6 +60,8 @@ int main() {
                 }
             }
         }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) settings.toggle();
     }
 
     return 0;
