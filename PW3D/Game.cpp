@@ -43,7 +43,7 @@ int Game::start(sf::RenderWindow* win, Settings* set) {
 int loop() {
     sf::Vector2u windowSize = window->getSize();
     sf::Mouse::setPosition(sf::Vector2i(windowSize.x / 2, windowSize.y / 2), *window);
-    
+    window->setView(sf::View(sf::FloatRect(-(windowSize.x * 0.5), -(windowSize.y * 0.5), windowSize.x * 2, windowSize.y * 2)));
     sf::Clock clock;
     float elapsedTime;
     float acc = 0;
@@ -56,12 +56,6 @@ int loop() {
     sf::Font f;
     f.loadFromMemory(&font, font_len);
     fpsCounter.setFont(f);
-
-    // Cant use sf::Keyboard::isKeyPressed() because that triggers antivirus software
-    bool W_PRESSED = false;
-    bool A_PRESSED = false;
-    bool S_PRESSED = false;
-    bool D_PRESSED = false;
 
 	while (running) {
         acc += clock.getElapsedTime().asSeconds();
@@ -95,10 +89,10 @@ int loop() {
         
         if (!settingsVisible) {
             // Get player movement information
-            if (W_PRESSED) player->moveForward(config->movementSpeed * elapsedTime);
-            if (A_PRESSED) player->moveLeft(config->movementSpeed * elapsedTime);
-            if (S_PRESSED) player->moveBackward(config->movementSpeed * elapsedTime);
-            if (D_PRESSED) player->moveRight(config->movementSpeed * elapsedTime);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) player->moveForward(config->movementSpeed * elapsedTime);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) player->moveLeft(config->movementSpeed * elapsedTime);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) player->moveBackward(config->movementSpeed * elapsedTime);
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) player->moveRight(config->movementSpeed * elapsedTime);
         }
 
         drawScreen(windowSize.x, windowSize.y);
@@ -121,19 +115,9 @@ int loop() {
             case sf::Event::Closed:
                 window->close();
                 return 0;
-            /*case sf::Event::KeyPressed:
-                if (event.key.code == sf::Keyboard::W) W_PRESSED = true;
-                if (event.key.code == sf::Keyboard::A) A_PRESSED = true;
-                if (event.key.code == sf::Keyboard::S) S_PRESSED = true;
-                if (event.key.code == sf::Keyboard::D) D_PRESSED = true;
+            case sf::Event::KeyPressed:
                 if (event.key.code == sf::Keyboard::Escape) settings->toggle();
                 break;
-            case sf::Event::KeyReleased:
-                if (event.key.code == sf::Keyboard::W) W_PRESSED = false;
-                if (event.key.code == sf::Keyboard::A) A_PRESSED = false;
-                if (event.key.code == sf::Keyboard::S) S_PRESSED = false;
-                if (event.key.code == sf::Keyboard::D) D_PRESSED = false;
-                break;*/
             }
             
             // Specific events (depending on settings visibility)
@@ -155,26 +139,11 @@ int loop() {
             else {
                 if (event.type == sf::Event::LostFocus) {
                     settings->toggle();
-                    W_PRESSED = false;
-                    A_PRESSED = false;
-                    S_PRESSED = false;
-                    D_PRESSED = false;
-                }/*
+                }
                 if (event.type == sf::Event::KeyPressed)
-                    if (event.key.code == sf::Keyboard::M) map->toggleView();*/
+                    if (event.key.code == sf::Keyboard::M) map->toggleView();
             }
         }
-
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) W_PRESSED = true;
-        else W_PRESSED = false;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) A_PRESSED = true;
-        else A_PRESSED = false;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) S_PRESSED = true;
-        else S_PRESSED = false;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) D_PRESSED = true;
-        else D_PRESSED = false;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) settings->toggle();
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) map->toggleView();
 	}
 	return 0;
 }
