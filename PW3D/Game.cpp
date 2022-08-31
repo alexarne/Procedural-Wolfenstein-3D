@@ -149,20 +149,40 @@ int loop() {
 }
 
 void drawScreen(int w_pre, int h_pre) {
+    sf::Vector2f dir = player->getDir();
+    sf::Vector2f plane = player->getPlane(config->fov);
+    sf::Vector2f pos = player->getPos();
+
     int w = (w_pre + config->quality - 1) / config->quality;
     //int h = (h_pre + config->quality - 1) / config->quality;
     int h = h_pre;
     int heightOrigin = player->getHeightOrigin(h);
     pixels.resize(0);
 
+    int y = 0;
+    // Current y position compared to the center of the screen (the horizon)
+    int p = y - heightOrigin;
+    if (y < heightOrigin) p *= -1;
+    // Vertical position of the camera.
+    float posZ = 0.5 * h;
+    // Horizontal distance from the camera to the floor for the current row.
+    // 0.5 is the z position exactly in the middle between floor and ceiling.
+    float rowDistance = posZ / p;
+    // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+    sf::Vector2f rayDir0(dir.x - plane.x, dir.y - plane.y);
+    sf::Vector2f rayDir1(dir.x + plane.x, dir.y + plane.y);
+    // calculate the real world step vector we have to add for each x (parallel to camera plane)
+    // adding step by step avoids multiplications with a weight in the inner loop
+    float floorStepX = rowDistance * (rayDir1.x - rayDir0.x) / w;
+    float floorStepY = rowDistance * (rayDir1.y - rayDir0.y) / w;
+    // real world coordinates of the leftmost column. This will be updated as we step to the right.
+    float floorX = pos.x + rowDistance * rayDir0.x;
+    float floorY = pos.y + rowDistance * rayDir0.y;
+
     // FLOOR & CEILING CASTING
     /*
     sf::Uint8* screenPixels = new sf::Uint8[w * h * 4];
     for (int y = 0; y < h; y++) {
-        sf::Vector2f dir = player->getDir();
-        sf::Vector2f plane = player->getPlane(config->fov);
-        sf::Vector2f pos = player->getPos();
-
         // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
         sf::Vector2f rayDir0(dir.x - plane.x, dir.y - plane.y);
         sf::Vector2f rayDir1(dir.x + plane.x, dir.y + plane.y);
@@ -213,12 +233,9 @@ void drawScreen(int w_pre, int h_pre) {
         const float cameraHeight = 0.5f; // height of player camera(1.0 is ceiling, 0.0 is floor)
 
         double cameraX = 2 * x / float(w) - 1;      // pixel in x of [-1, 1)
-        sf::Vector2f plane = player->getPlane(config->fov);
-        sf::Vector2f dir = player->getDir();
         sf::Vector2f rayDir(dir.x + plane.x * cameraX, dir.y + plane.y * cameraX);
 
         // which box of the map we're in
-        sf::Vector2f pos = player->getPos();
         sf::Vector2i mapPos(int(pos.x), int(pos.y));
 
         // length of ray from current position to next x or y-side
@@ -288,6 +305,10 @@ void drawScreen(int w_pre, int h_pre) {
             //Calculate height of line to draw on screen
             lineHeight = (int) (h / perpWallDist);
 
+            // Check if ray has hit a wall
+            if (worldMap[mapPos.y][mapPos.x] > 0) hit = true;
+            //if (lineHeight >= h) continue;
+
             if (config->useVisibility) {
                 prevIntensity = currIntensity;
                 float intensity = 1 - perpWallDist / config->visibilityDepth;
@@ -305,21 +326,28 @@ void drawScreen(int w_pre, int h_pre) {
             int texY = int(wallY * double(TEXTURE_HEIGHT));
             currPoint = sf::Vector2i(texX, texY);
             sf::Color c = (mapPos.x + mapPos.y) % 2 == 0 ? sf::Color::Green : sf::Color::Cyan;
+
+            // Floor and ceiling line points
+            float floorPixel_s = floorPixel;
+            floorPixel = int(heightOrigin + lineHeight * cameraHeight);
+            float floorPixel_e = floorPixel;
+            float ceilingPixel_s = ceilingPixel;
+            ceilingPixel = int(heightOrigin - lineHeight * (1.0f - cameraHeight));
+            float ceilingPixel_e = ceilingPixel;
+
             // add floor
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), c//,
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_s), c//,
                 //Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
             ));
-            floorPixel = int(heightOrigin + lineHeight * cameraHeight);
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel), c//, 
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_e), c//, 
                 //Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
             ));
 
             // add ceiling
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), c//, 
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_s), c//, 
                 //Assets::getTextureCoords(ceilingTexture, prevPoint.x, prevPoint.y, true)
             ));
-            ceilingPixel = int(heightOrigin - lineHeight * (1.0f - cameraHeight));
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel), c//, 
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_e), c//, 
                 //Assets::getTextureCoords(ceilingTexture, currPoint.x, currPoint.y, true)
             ));
 
@@ -328,9 +356,6 @@ void drawScreen(int w_pre, int h_pre) {
             if (prevPoint.x == TEXTURE_WIDTH - 1) prevPoint.x = 0;
             if (prevPoint.y == 0) prevPoint.y = TEXTURE_HEIGHT - 1;
             if (prevPoint.y == TEXTURE_HEIGHT - 1) prevPoint.y = 0;
-
-            // Check if ray has hit a wall
-            if (worldMap[mapPos.y][mapPos.x] > 0) hit = true;
             //if (config->useVisibility && perpWallDist > config->visibilityDepth) break;
         }
         if (!hit) continue;
@@ -375,6 +400,9 @@ void drawScreen(int w_pre, int h_pre) {
                 Assets::getTextureCoords(worldMap[mapPos.y][mapPos.x], texX, TEXTURE_HEIGHT - 1, shadowed)
             ));
         }
+
+        floorX += floorStepX;
+        floorY += floorStepY;
     }
     window->draw(pixels, *state);
 }
