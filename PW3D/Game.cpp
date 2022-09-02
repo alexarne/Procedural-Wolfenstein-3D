@@ -336,18 +336,23 @@ void drawScreen(int w_pre, int h_pre) {
             float ceilingPixel_e = ceilingPixel;
 
             // add floor
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_s), c//,
-                //Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
-            ));
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_e), c//, 
-                //Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
-            ));
+            if (floorPixel_e < h) {
+                if (floorPixel_s > h) floorPixel_s = h;
+                pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_s), c,
+                    Assets::getTextureCoords(floorTexture, 0, 0, false)
+                    //Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
+                ));
+                pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_e), c, 
+                    Assets::getTextureCoords(floorTexture, 0, 63, false)
+                    //Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
+                ));
+            }
 
             // add ceiling
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_s), c//, 
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_s), c
                 //Assets::getTextureCoords(ceilingTexture, prevPoint.x, prevPoint.y, true)
             ));
-            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_e), c//, 
+            pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)ceilingPixel_e), c
                 //Assets::getTextureCoords(ceilingTexture, currPoint.x, currPoint.y, true)
             ));
 
@@ -405,6 +410,8 @@ void drawScreen(int w_pre, int h_pre) {
         floorY += floorStepY;
     }
     window->draw(pixels, *state);
+    //sf::VertexArray temp;
+    //temp.append(sf::Vertex(sf::Vector2f(), ));
 }
 
 void setPixel(sf::Uint8* screen, int x, int y, int w, int h, sf::Color color) {
