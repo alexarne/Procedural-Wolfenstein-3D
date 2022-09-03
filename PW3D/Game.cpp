@@ -337,14 +337,32 @@ void drawScreen(int w_pre, int h_pre) {
 
             // add floor
             if (floorPixel_e < h) {
-                if (floorPixel_s > h) floorPixel_s = h;
-                pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_s), c,
-                    Assets::getTextureCoords(floorTexture, 0, 0, false)
-                    //Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
+                if (floorPixel_s > h) {
+                    floorPixel_s = h;
+
+                    int y = floorPixel_s;
+                    // Current y position compared to the center of the screen (the horizon)
+                    int p = y - heightOrigin;
+                    if (y < heightOrigin) p *= -1;
+                    // Vertical position of the camera.
+                    float posZ = 0.5 * h;
+                    // Horizontal distance from the camera to the floor for the current row.
+                    // 0.5 is the z position exactly in the middle between floor and ceiling.
+                    float rowDistance = posZ / p;
+                    // real world coordinates of the leftmost column. This will be updated as we step to the right.
+                    float floorX = pos.x + rowDistance * rayDir.x;
+                    float floorY = pos.y + rowDistance * rayDir.y;
+                    prevPoint.x = floorX;
+                    prevPoint.y = floorY;
+                }
+                c = sf::Color::White;
+                pixels.append(sf::Vertex(sf::Vector2f((float)x + 0.5, (float)floorPixel_s), c,
+                    //Assets::getTextureCoords(floorTexture, 0, 0, false)
+                    Assets::getTextureCoords(floorTexture, prevPoint.x, prevPoint.y, false)
                 ));
-                pixels.append(sf::Vertex(sf::Vector2f((float)x, (float)floorPixel_e), c, 
-                    Assets::getTextureCoords(floorTexture, 0, 63, false)
-                    //Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
+                pixels.append(sf::Vertex(sf::Vector2f((float)x + 0.5, (float)floorPixel_e), c,
+                    //Assets::getTextureCoords(floorTexture, 0, 63, false)
+                    Assets::getTextureCoords(floorTexture, currPoint.x, currPoint.y, false)
                 ));
             }
 
