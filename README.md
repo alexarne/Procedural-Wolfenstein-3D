@@ -1,6 +1,6 @@
 # Procedural-Wolfenstein-3D
 
-
+Game which closely resembles Wolfenstein 3D (1992), developed in C++ and the SFML library. The project is about exploring the rendering techniques from early game development and to achieve what appears to be 3D imagery through simple 2D calculations such as raycasting. It follows the techniques outlined in [lodev's tutorial](https://lodev.org/cgtutor/raycasting.html) but iterates upon it for increased performance and playability. 
 
 ## Demonstration
 
