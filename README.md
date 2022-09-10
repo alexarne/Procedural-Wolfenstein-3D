@@ -26,6 +26,12 @@ A general overview of the code structure and what each file does is found in the
 
 * **Raycasting**
 
+    We choose to draw the walls as sequential vertical lines, one for each horizontal pixel, and by changing the height of the vertical lines we may create the appearance of a rotated wall and therefore depth. By letting walls only be vertical to the ground and the player's view direction to always be parallel to the ground we only have to draw the walls as straight lines. A wall line is (usually) centered in the middle so what is left to calculate is the height of the line. This is inversely proportional to the perpendicular distance from the player's camera plane. To get the distance, we need to know the position of where the wall was hit. For that, we send out a ray for each line that has to been drawn and use Digital Differential Analysis (DDA) to step through each tile until a wall has been hit.
+    
+* **Digital Differential Analysis**
+
+    
+
 ## Difficulties Encountered
 
 * **Efficient Rendering**
