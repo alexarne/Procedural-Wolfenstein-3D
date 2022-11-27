@@ -4,6 +4,14 @@ Game which closely resembles Wolfenstein 3D (1992), developed in C++ using the S
 
 > Due to difficulties with implementing textured floors and ceilings, this project has been put on pause.
 
+![Pixel Rendering](/images/per_pixel.png)
+
+Rendering the frames pixel-by-pixel was easy and straightforward, but lead to way too bad performance, especially considering this is basically 90's graphics on a modern computer. The issue (explained in detail below) was not utilizing the GPU properly and leaving everything to the CPU.
+
+![Line Rendering](/images/gpu_lines.png)
+
+When trying to fix that issue by rendering lines on the GPU instead of pixels, the issue became instead how to draw the floor and ceiling, since those lines aren't straight. This became a difficult and time consuming task, which is why I haven't been able to finish it yet.
+
 ## Demonstration (WIP)
 
 [YouTube video showcasing most of the features (WIP)](link)
