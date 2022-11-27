@@ -6,7 +6,7 @@ Game which closely resembles Wolfenstein 3D (1992), developed in C++ using the S
 
 ![Pixel Rendering](/images/per_pixel.png)
 
-Rendering the frames pixel-by-pixel was easy and straightforward, but lead to way too bad performance, especially considering this is basically 90's graphics on a modern computer. The issue (explained in detail below) was not utilizing the GPU properly and leaving everything to the CPU.
+Rendering the frames pixel-by-pixel was easy and straightforward, but lead to way too poor performance, especially considering this is basically 90's graphics on a modern computer. The issue (explained in detail below) was not utilizing the GPU properly and leaving everything to the CPU.
 
 ![Line Rendering](/images/gpu_lines.png)
 
