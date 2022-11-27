@@ -1,20 +1,22 @@
 # Procedural-Wolfenstein-3D
 
-Game which closely resembles Wolfenstein 3D (1992), developed in C++ and the SFML library. The project is about exploring the rendering techniques from early game development and to achieve what appears to be 3D imagery through simple 2D calculations such as raycasting. It follows the techniques outlined in [lodev's tutorial](https://lodev.org/cgtutor/raycasting.html) but iterates upon it for increased performance and playability. 
+Game which closely resembles Wolfenstein 3D (1992), developed in C++ using the SFML library. The project is about exploring the rendering techniques from early game development and to achieve what appears to be 3D imagery through simple 2D calculations such as raycasting. It follows the techniques outlined in [lodev's tutorial](https://lodev.org/cgtutor/raycasting.html) but iterates upon it for increased performance and playability. 
 
-## Demonstration
+> Due to difficulties with implementing textured floors and ceilings, this project has been put on pause.
 
-[YouTube video showcasing most of the features](link)
+## Demonstration (WIP)
 
-## Instructions
+[YouTube video showcasing most of the features (WIP)](link)
 
+## Instructions (WIP)
 
+To come
 
-## TODOs
+## TODOs (WIP)
 
+To come
 
-
-## Code Overview
+## Code Overview (WIP)
 
 A general overview of the code structure and what each file does is found in the [folder](./scripts/).
 
@@ -30,7 +32,7 @@ A general overview of the code structure and what each file does is found in the
     
 * **Digital Differential Analysis**
 
-    
+    To come
 
 ## Difficulties Encountered
 
@@ -40,7 +42,8 @@ A general overview of the code structure and what each file does is found in the
 
 ## Known Bugs
 
-
+To come
 
 ## Final Words
 
+To come
